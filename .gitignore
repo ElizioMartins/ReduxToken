@@ -1,0 +1,33 @@
+# Rust
+target/
+Cargo.lock
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.venv/
+venv/
+dist/
+build/
+*.egg-info/
+.eggs/
+
+# maturin
+*.so
+*.pyd
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Arquivos antigos do projeto
+kompressa_projeto.tar.gz
+README_REDUXTOKEN.md
+QUICKSTART.md
