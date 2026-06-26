@@ -13,7 +13,7 @@ Objetivo: projeto estruturado, core Rust funcionando, bindings Python instaláve
 - [x] Configurar `maturin` para build e instalação local (`pyproject.toml`)
 - [x] Testes unitários dos filtros em Rust (inline `#[cfg(test)]`)
 - [x] Exemplos em `examples/basic.py`
-- [ ] Testes de integração em Python
+- [x] Testes de integração em Python
 - [ ] Validar build: `maturin develop && python examples/basic.py`
 
 ## Fase 2 — Proxy HTTP (Rust)
