@@ -1,0 +1,3 @@
+[workspace]
+members = ["redux-token-core"]
+resolver = "2"

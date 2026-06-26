@@ -1,0 +1,16 @@
+[build-system]
+requires = ["maturin>=1.7,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "redux-token"
+version = "0.1.0"
+description = "Compressor inteligente de tokens para LLMs"
+requires-python = ">=3.10"
+license = { text = "Apache-2.0" }
+dependencies = ["typer>=0.12"]
+
+[tool.maturin]
+features = ["pyo3/extension-module"]
+module-name = "redux_token_core"
+manifest-path = "redux-token-core/Cargo.toml"

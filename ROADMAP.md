@@ -4,16 +4,17 @@
 
 Objetivo: projeto estruturado, core Rust funcionando, bindings Python instaláveis.
 
-- [ ] Criar crate `redux-token-core` com trait `Filter`
-- [ ] Implementar `JsonFilter`, `CodeFilter`, `TextFilter`, `SmartFilter` em Rust
-- [ ] `CompressionStats` struct (tokens originais, comprimidos, % economia, tempo)
-- [ ] Expor via PyO3: `compress(text) -> (str, stats)`
-- [ ] Pacote Python `redux_token` com `ReduxToken` class e `utils.py`
-- [ ] CLI básica com `typer`: `compress`, `stats`
-- [ ] Configurar `maturin` para build e instalação local
-- [ ] Testes unitários dos filtros em Rust
+- [x] Criar crate `redux-token-core` com trait `Filter`
+- [x] Implementar `JsonFilter`, `CodeFilter`, `TextFilter`, `SmartFilter` em Rust
+- [x] `CompressionStats` struct (tokens originais, comprimidos, % economia, tempo)
+- [x] Expor via PyO3: `compress(text) -> (str, stats)`
+- [x] Pacote Python `redux_token` com `ReduxToken` class e `utils.py`
+- [x] CLI básica com `typer`: `compress`, `cost`
+- [x] Configurar `maturin` para build e instalação local (`pyproject.toml`)
+- [x] Testes unitários dos filtros em Rust (inline `#[cfg(test)]`)
+- [x] Exemplos em `examples/basic.py`
 - [ ] Testes de integração em Python
-- [ ] Exemplos em `examples/`
+- [ ] Validar build: `maturin develop && python examples/basic.py`
 
 ## Fase 2 — Proxy HTTP (Rust)
 
