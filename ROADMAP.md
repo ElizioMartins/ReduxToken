@@ -30,10 +30,10 @@ Objetivo: interceptar requests para APIs de LLM e comprimir transparentemente.
 
 Objetivo: funcionar como hook dentro de ferramentas de dev.
 
-- [ ] Hook `PreToolUse` para Claude Code (comprime output de comandos)
-- [ ] Suporte a `.cursorrules` para Cursor
-- [ ] Modo `watch`: monitora arquivo e comprime ao salvar
-- [ ] Relatório de economia acumulada em `REDUXTOKEN_STATS.md`
+- [x] Hook `PostToolUse` para Claude Code (comprime output de Bash e Read)
+- [x] Suporte a `.cursorrules` para Cursor
+- [x] Modo `watch`: monitora arquivo e comprime ao salvar
+- [x] Relatório de economia acumulada em `REDUXTOKEN_STATS.md` (`redux-token report`)
 
 ## Fase 4 — Publicação e ecossistema
 

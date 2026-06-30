@@ -1,0 +1,31 @@
+# ReduxToken
+
+Este projeto usa ReduxToken para reduzir o consumo de tokens em chamadas a LLMs.
+
+## Ao analisar outputs grandes
+
+Prefira versões comprimidas antes de incluir no contexto:
+
+```bash
+python -m redux_token compress --file <arquivo>
+# ou via pipe:
+cat arquivo.log | python -m redux_token compress
+```
+
+## Campos JSON que podem ser ignorados
+
+`id`, `uuid`, `_id`, `created_at`, `updated_at`, `deleted_at`, `metadata`,
+`timestamps`, `deprecated`, `version` — o ReduxToken remove automaticamente.
+
+## Proxy HTTP automático
+
+Para comprimir requests de LLM de forma transparente:
+
+```bash
+cargo run --package redux-token-proxy
+# Configure sua app: http://localhost:8080/openai/... ou /claude/...
+```
+
+## Convenção de documentação
+
+Arquivos `.md` devem evoluir no mesmo commit que o código que documentam.

@@ -26,6 +26,9 @@ build/
 .DS_Store
 Thumbs.db
 
+# Gerado em runtime
+REDUXTOKEN_STATS.md
+
 # Arquivos antigos do projeto
 kompressa_projeto.tar.gz
 README_REDUXTOKEN.md
