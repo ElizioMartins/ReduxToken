@@ -1,0 +1,16 @@
+[server]
+port = 8080
+
+# Cada provider mapeia um prefixo de URL para o host real da API.
+# Exemplo: POST http://localhost:8080/openai/v1/chat/completions
+#          → comprime content → encaminha para https://api.openai.com/v1/chat/completions
+
+[[providers]]
+name   = "openai"
+target = "https://api.openai.com"
+prefix = "/openai"
+
+[[providers]]
+name   = "claude"
+target = "https://api.anthropic.com"
+prefix = "/claude"

@@ -66,13 +66,45 @@ redux_token_core.Compressor.compress()  ← Rust (via PyO3)
 Retorna para Python como (str, CompressionStats)
 ```
 
-## Próxima camada: Proxy HTTP
+### `redux-token-proxy` (Rust)
 
-Quando implementado (Fase 2), o proxy será um servidor `axum` (Rust) que intercepta requests para APIs de LLM e comprime o campo `content` antes de repassar. O binário Rust roda standalone, sem dependência do Python.
+Binário standalone (`redux-proxy`) que intercept requests antes de chegarem à API de LLM e comprime o campo `content` de cada mensagem.
 
 ```
-Cliente → axum proxy (Rust) → compressor.rs → LLM API
+redux-token-proxy/src/
+├── main.rs     # AppState, roteamento axum, entry point
+├── proxy.rs    # handler HTTP, compress_messages
+├── config.rs   # proxy.toml → Config struct
+├── cache.rs    # DashMap<SHA-256 → compressed>
+└── stats.rs    # AtomicU64 counters + GET /_redux/stats
 ```
+
+**Roteamento por provider**: o cliente aponta para `localhost:8080/<provider>/...` e o proxy remove o prefixo e encaminha para o host real.
+
+```
+POST /openai/v1/chat/completions → https://api.openai.com/v1/chat/completions
+POST /claude/v1/messages         → https://api.anthropic.com/v1/messages
+```
+
+**Cache de compressão**: SHA-256 do texto original como chave; evita recomprimir mensagens repetidas entre requests.
+
+## Fluxo de dados — Proxy
+
+```
+App / Agente
+    │  POST /openai/v1/chat/completions  (messages[].content não comprimido)
+    ▼
+redux-proxy (axum)
+    │
+    ├── parse JSON body
+    ├── compress_messages()  →  cache hit? → retorna valor cacheado
+    │                           miss?      → Compressor::compress() + insere no cache
+    │
+    ▼
+reqwest → api.openai.com  (body comprimido, headers originais preservados)
+    │
+    ▼ response (streaming)
+App / Agente
 
 ## Decisões arquiteturais registradas
 
@@ -81,7 +113,7 @@ Cliente → axum proxy (Rust) → compressor.rs → LLM API
 | Linguagem core | Rust | Performance + segurança de memória |
 | Bindings | PyO3 + maturin | Pacote Python nativo sem deps extras |
 | CLI | typer | Simples, help gerado automaticamente |
-| Proxy (futuro) | axum | Async nativo em Rust, mesma base do core |
+| Proxy HTTP | axum | Async nativo em Rust, mesma base do core |
 | Filtros | trait `Filter` | Composição e testabilidade independente |
 
 Quando uma decisão mudar ou tiver consequências não óbvias, um ADR vai em `docs/adr/`.

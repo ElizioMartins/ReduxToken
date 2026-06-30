@@ -1,3 +1,3 @@
 [workspace]
-members = ["redux-token-core"]
+members = ["redux-token-core", "redux-token-proxy"]
 resolver = "2"

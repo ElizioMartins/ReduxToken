@@ -1,11 +1,11 @@
 use pyo3::prelude::*;
 
-mod compressor;
-mod filters;
-mod stats;
+pub mod compressor;
+pub mod filters;
+pub mod stats;
 
-use compressor::Compressor;
-use stats::CompressionStats;
+pub use compressor::Compressor;
+pub use stats::CompressionStats;
 
 #[pyclass]
 struct PyCompressor {

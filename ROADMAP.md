@@ -20,11 +20,11 @@ Objetivo: projeto estruturado, core Rust funcionando, bindings Python instaláve
 
 Objetivo: interceptar requests para APIs de LLM e comprimir transparentemente.
 
-- [ ] Servidor `axum` standalone
-- [ ] Comprime campo `content` de requests OpenAI/Claude antes de repassar
-- [ ] Suporte a múltiplos providers via config
-- [ ] Cache de resultados de compressão (hash do input)
-- [ ] Estatísticas por sessão
+- [x] Servidor `axum` standalone
+- [x] Comprime campo `content` de requests OpenAI/Claude antes de repassar
+- [x] Suporte a múltiplos providers via config
+- [x] Cache de resultados de compressão (hash do input)
+- [x] Estatísticas por sessão
 
 ## Fase 3 — Integrações com agentes
 
