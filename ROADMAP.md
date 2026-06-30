@@ -14,7 +14,7 @@ Objetivo: projeto estruturado, core Rust funcionando, bindings Python instaláve
 - [x] Testes unitários dos filtros em Rust (inline `#[cfg(test)]`)
 - [x] Exemplos em `examples/basic.py`
 - [x] Testes de integração em Python
-- [ ] Validar build: `maturin develop && python examples/basic.py`
+- [x] Validar build: `maturin develop && python examples/basic.py`
 
 ## Fase 2 — Proxy HTTP (Rust)
 
