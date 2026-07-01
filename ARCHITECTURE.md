@@ -115,11 +115,11 @@ App / Agente
 | Artefato | Como obter |
 |---|---|
 | Pacote Python | `pip install redux-token` (PyPI) |
-| Wheel atual | Windows x86_64 / CPython 3.13 |
+| Wheels | Linux (manylinux), macOS, Windows — Python 3.10–3.13 |
 | Source dist | `redux_token-*.tar.gz` — compila em qualquer plataforma com Rust |
 | Proxy binário | `cargo build --release --package redux-token-proxy` |
 
-Para wheels multi-plataforma (Linux, macOS, Python 3.10–3.13), configurar GitHub Actions com `maturin-action`.
+Geração de wheels via GitHub Actions com `maturin-action` no push de tag `v*`.
 
 ## Decisões arquiteturais registradas
 

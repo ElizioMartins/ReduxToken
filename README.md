@@ -20,7 +20,7 @@ Core de alta performance em **Rust**, interface acessível em **Python**.
 pip install redux-token
 ```
 
-> **Nota:** O pacote contém código Rust compilado. Wheel atual: Windows x86_64 / Python 3.13. Para outras plataformas, instale Rust e o pip compilará a partir do source: `pip install redux-token`.
+> Wheels disponíveis para Linux, macOS e Windows — Python 3.10, 3.11, 3.12 e 3.13.
 
 ## Uso rápido
 
