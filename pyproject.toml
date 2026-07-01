@@ -40,6 +40,7 @@ dev = ["pytest>=8.0"]
 
 [tool.maturin]
 features = ["pyo3/extension-module"]
+include = ["LICENSE"]
 module-name = "redux_token._core"
 manifest-path = "redux-token-core/Cargo.toml"
 python-source = "."
