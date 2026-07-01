@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Callable
 
-from redux_token_core import PyCompressor, CompressionStats
+from redux_token._core import PyCompressor, CompressionStats
 
 FilterFn = Callable[[str], str]
 

@@ -26,7 +26,7 @@ impl PyCompressor {
 }
 
 #[pymodule]
-fn redux_token_core(m: &Bound<'_, PyModule>) -> PyResult<()> {
+fn _core(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<PyCompressor>()?;
     m.add_class::<CompressionStats>()?;
     Ok(())

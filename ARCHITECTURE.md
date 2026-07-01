@@ -32,7 +32,7 @@ redux-token-core/src/
 
 ### `redux_token` (Python)
 
-Pacote Python que importa o módulo compilado (`redux_token_core`) e expõe uma API limpa.
+Pacote Python que importa o módulo compilado (`redux_token._core`) e expõe uma API limpa.
 
 ```
 redux_token/
@@ -58,7 +58,7 @@ Usuário / Agente
 redux_token.ReduxToken.compress(text)   ← Python
     │
     ▼
-redux_token_core.Compressor.compress()  ← Rust (via PyO3)
+redux_token._core.Compressor.compress()  ← Rust (via PyO3)
     │
     ├── json::JsonFilter.apply()
     ├── code::CodeFilter.apply()

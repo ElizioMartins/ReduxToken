@@ -36,3 +36,5 @@ REDUXTOKEN_STATS.md
 kompressa_projeto.tar.gz
 README_REDUXTOKEN.md
 QUICKSTART.md
+dist_local/
+*.pdb
