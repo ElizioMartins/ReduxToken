@@ -39,12 +39,15 @@ redux_token/
 ├── __init__.py         # ReduxToken class, extra_filters API, exports
 ├── cli.py              # CLI (typer): compress, cost, watch, report
 ├── hook.py             # PostToolUse hook para Claude Code
+├── mcp.py              # MCP Server (FastMCP): compress, compress_file, estimate_cost
 └── utils.py            # estimate_cost_savings
 ```
 
 **Decisão de CLI**: usar `typer` (wrapper sobre Click) — mais simples de manter e gera help automático.
 
 **Filtros customizados Python**: `ReduxToken(extra_filters=[fn, ...])` aceita funções `str -> str` que rodam em sequência após os filtros Rust. Permitem extensões sem recompilar o core.
+
+**MCP Server**: `mcp.py` usa `FastMCP` (SDK oficial MCP) para expor três tools — `compress`, `compress_file`, `estimate_cost`. Qualquer cliente que implemente o protocolo MCP (Claude Desktop, Cursor, Zed) pode usar o ReduxToken como ferramenta nativa. Entry point: `redux-token-mcp`.
 
 ## Fluxo de dados
 

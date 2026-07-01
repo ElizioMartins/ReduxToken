@@ -38,9 +38,12 @@ Objetivo: funcionar como hook dentro de ferramentas de dev.
 ## Fase 4 — Publicação e ecossistema
 
 - [x] Publicar no PyPI como `redux-token` (`pip install redux-token`)
+- [x] Wheels multi-plataforma via CI (Linux, macOS, Windows — Python 3.10–3.13)
 - [x] Benchmarks por tipo de conteúdo (`benchmarks/compare.py`)
 - [x] API para filtros customizados (`ReduxToken(extra_filters=[...])`)
 - [x] Documentação de extensão (README — seção Filtros customizados)
+- [x] MCP Server com tools `compress`, `compress_file`, `estimate_cost`
+- [x] Compatível com Claude Desktop, Cursor, Zed e qualquer cliente MCP
 
 ## Fora do escopo por ora
 
