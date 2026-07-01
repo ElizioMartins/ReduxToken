@@ -117,6 +117,51 @@ Para projetos externos, adicione ao `.claude/settings.json`:
 }
 ```
 
+## MCP Server (Claude Desktop, Cursor, Zed, etc.)
+
+Qualquer cliente que suporte o protocolo MCP pode usar o ReduxToken como ferramenta.
+
+```bash
+pip install redux-token
+```
+
+### Claude Desktop
+
+Edite o arquivo de configuração:
+- **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+- **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
+
+```json
+{
+  "mcpServers": {
+    "redux-token": {
+      "command": "python",
+      "args": ["-m", "redux_token.mcp"]
+    }
+  }
+}
+```
+
+### Cursor / Zed / outros clientes MCP
+
+```json
+{
+  "mcpServers": {
+    "redux-token": {
+      "command": "redux-token-mcp"
+    }
+  }
+}
+```
+
+### Ferramentas disponíveis
+
+| Ferramenta | O que faz |
+|---|---|
+| `compress` | Comprime texto — remove DEBUG, comentários, metadados JSON, duplicatas |
+| `compress_file` | Lê um arquivo do disco e comprime |
+| `estimate_cost` | Calcula economia financeira dado o volume de tokens |
+
 ## Instalação para desenvolvimento
 
 Requer Rust + Python 3.10+.

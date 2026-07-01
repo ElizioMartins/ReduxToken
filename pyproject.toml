@@ -24,7 +24,7 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Topic :: Text Processing",
 ]
-dependencies = ["typer>=0.12"]
+dependencies = ["typer>=0.12", "mcp>=1.0"]
 
 [project.urls]
 Homepage   = "https://github.com/ElizioMartins/ReduxToken"
@@ -32,7 +32,8 @@ Repository = "https://github.com/ElizioMartins/ReduxToken"
 Issues     = "https://github.com/ElizioMartins/ReduxToken/issues"
 
 [project.scripts]
-redux-token = "redux_token.cli:main"
+redux-token     = "redux_token.cli:main"
+redux-token-mcp = "redux_token.mcp:main"
 
 [project.optional-dependencies]
 dev = ["pytest>=8.0"]
