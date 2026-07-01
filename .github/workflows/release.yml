@@ -86,11 +86,11 @@ jobs:
   publish:
     needs: [linux, windows, macos, sdist]
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
     steps:
       - uses: actions/download-artifact@v4
         with:
           merge-multiple: true
           path: dist
       - uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          password: ${{ secrets.PYPI_API_TOKEN }}
