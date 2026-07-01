@@ -137,7 +137,7 @@ Se o ReduxToken te economizou tokens (e dinheiro), considere contribuir para man
 
 - [GitHub Sponsors](https://github.com/sponsors/ElizioMartins)
 - [Ko-fi](https://ko-fi.com/eliziomartins)
-- PIX: `elizio.matins@gmail.com`
+- PIX: `elizio.martins@hotmail.com`
 
 ## Licença
 
