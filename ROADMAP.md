@@ -1,6 +1,6 @@
 # Roadmap — ReduxToken
 
-## Fase 1 — Fundação Rust + Python (atual)
+## Fase 1 — Fundação Rust + Python
 
 Objetivo: projeto estruturado, core Rust funcionando, bindings Python instaláveis.
 
@@ -37,7 +37,7 @@ Objetivo: funcionar como hook dentro de ferramentas de dev.
 
 ## Fase 4 — Publicação e ecossistema
 
-- [ ] Publicar no PyPI como `redux-token` (wheel pronta: `maturin publish`)
+- [x] Publicar no PyPI como `redux-token` (`pip install redux-token`)
 - [x] Benchmarks por tipo de conteúdo (`benchmarks/compare.py`)
 - [x] API para filtros customizados (`ReduxToken(extra_filters=[...])`)
 - [x] Documentação de extensão (README — seção Filtros customizados)

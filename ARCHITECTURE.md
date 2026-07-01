@@ -36,12 +36,15 @@ Pacote Python que importa o módulo compilado (`redux_token_core`) e expõe uma 
 
 ```
 redux_token/
-├── __init__.py         # ReduxToken class, exports
-├── cli.py              # CLI (typer)
-└── utils.py            # estimate_cost_savings, formatação
+├── __init__.py         # ReduxToken class, extra_filters API, exports
+├── cli.py              # CLI (typer): compress, cost, watch, report
+├── hook.py             # PostToolUse hook para Claude Code
+└── utils.py            # estimate_cost_savings
 ```
 
 **Decisão de CLI**: usar `typer` (wrapper sobre Click) — mais simples de manter e gera help automático.
+
+**Filtros customizados Python**: `ReduxToken(extra_filters=[fn, ...])` aceita funções `str -> str` que rodam em sequência após os filtros Rust. Permitem extensões sem recompilar o core.
 
 ## Fluxo de dados
 
@@ -105,6 +108,18 @@ reqwest → api.openai.com  (body comprimido, headers originais preservados)
     │
     ▼ response (streaming)
 App / Agente
+```
+
+## Distribuição
+
+| Artefato | Como obter |
+|---|---|
+| Pacote Python | `pip install redux-token` (PyPI) |
+| Wheel atual | Windows x86_64 / CPython 3.13 |
+| Source dist | `redux_token-*.tar.gz` — compila em qualquer plataforma com Rust |
+| Proxy binário | `cargo build --release --package redux-token-proxy` |
+
+Para wheels multi-plataforma (Linux, macOS, Python 3.10–3.13), configurar GitHub Actions com `maturin-action`.
 
 ## Decisões arquiteturais registradas
 

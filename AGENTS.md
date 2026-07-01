@@ -10,9 +10,12 @@ ReduxToken comprime texto, JSON, código e logs antes de enviá-los a LLMs, redu
 
 ```
 redux-token-core/   Rust — algoritmos de compressão (não modifique sem entender os filtros)
-redux_token/        Python — bindings PyO3, CLI, utils
-tests/              Testes unitários e de integração
+redux-token-proxy/  Rust — proxy HTTP axum (binário redux-proxy)
+redux_token/        Python — bindings PyO3, CLI, hook, utils
+tests/              Testes de integração Python
+benchmarks/         Scripts de benchmark por tipo de conteúdo
 examples/           Exemplos de uso real
+proxy.toml          Configuração de providers do proxy
 ```
 
 ## Documentação viva
@@ -30,8 +33,10 @@ Isso facilita contribuidores entenderem o projeto sem precisar ler o histórico 
 
 - Filtros em Rust implementam o trait `Filter`. Ao criar um novo filtro, implemente o trait e registre no `Compressor::default()`.
 - `CompressionStats` é retornado por toda compressão. Não remova campos — quebraria bindings Python.
-- A CLI usa `typer`. Novos subcomandos seguem o padrão `@app.command()`.
-- Testes de filtros ficam em `redux-token-core/tests/`. Testes de integração Python ficam em `tests/`.
+- A CLI usa `typer`. Comandos disponíveis: `compress`, `cost`, `watch`, `report`. Novos subcomandos seguem o padrão `@app.command()`.
+- `hook.py` é o PostToolUse hook para Claude Code — nunca levante exceções sem capturar; falha silenciosa é o comportamento correto.
+- `ReduxToken(extra_filters=[...])` aceita funções Python `str -> str` que rodam após o core Rust.
+- Testes unitários dos filtros Rust ficam inline (`#[cfg(test)]` em cada arquivo). Testes de integração Python ficam em `tests/`.
 - Não adicione dependências Rust pesadas sem justificativa no ARCHITECTURE.md.
 
 ## Linguagem
