@@ -18,6 +18,24 @@
             "command": "python -m redux_token.hook"
           }
         ]
+      },
+      {
+        "matcher": "Grep",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python -m redux_token.hook"
+          }
+        ]
+      },
+      {
+        "matcher": "Glob",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python -m redux_token.hook"
+          }
+        ]
       }
     ]
   }
