@@ -131,6 +131,14 @@ python examples/basic.py
 
 Veja [ARCHITECTURE.md](ARCHITECTURE.md) para decisões técnicas e [ROADMAP.md](ROADMAP.md) para o plano de desenvolvimento.
 
+## Apoio
+
+Se o ReduxToken te economizou tokens (e dinheiro), considere contribuir para manter o projeto:
+
+- [GitHub Sponsors](https://github.com/sponsors/ElizioMartins)
+- [Ko-fi](https://ko-fi.com/eliziomartins)
+- PIX: `elizio.matins@gmail.com`
+
 ## Licença
 
 Apache 2.0
