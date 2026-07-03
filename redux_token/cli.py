@@ -196,6 +196,68 @@ def gain(
     typer.echo("")
 
 
+@app.command()
+def session(
+    last: int = typer.Option(10, "--last", "-n", help="Quantas sessões mostrar"),
+    as_json: bool = typer.Option(False, "--json", help="Saída JSON para scripts"),
+) -> None:
+    """Lista as últimas execuções (adoção ao longo do tempo), agrupadas por sessão."""
+    from redux_token import analytics
+
+    sessions = analytics.session_summaries(analytics.load_events())[:last]
+
+    if as_json:
+        payload = [
+            {k: s[k] for k in ("session_id", "start_str", "source", "events", "tokens_saved", "reduction_pct")}
+            for s in sessions
+        ]
+        typer.echo(json.dumps(payload))
+        return
+
+    if not sessions:
+        typer.echo("Nenhuma sessão registrada ainda.")
+        return
+
+    hn = analytics.human_number
+    typer.echo(f"\n  Sessão                    Fonte   Eventos  Economia    %")
+    typer.echo("  " + "─" * 54)
+    for s in sessions:
+        typer.echo(
+            f"  {s['start_str']:<16}  {s['short_id']:<6}{s['source']:<7} "
+            f"{s['events']:>6}  {hn(s['tokens_saved']):>7}  {s['reduction_pct']:>4.0f}%"
+        )
+    typer.echo("")
+
+
+@app.command()
+def discover(
+    as_json: bool = typer.Option(False, "--json", help="Saída JSON para scripts"),
+) -> None:
+    """Aponta oportunidades de otimização não aproveitadas (regras explicáveis)."""
+    from redux_token import analytics
+
+    events = analytics.load_events()
+    findings = analytics.discover(events)
+
+    if as_json:
+        typer.echo(json.dumps(findings))
+        return
+
+    if not events:
+        typer.echo("Nenhum evento registrado ainda — nada a analisar.")
+        return
+    if not findings:
+        typer.echo("\n  ✓ Nenhuma oportunidade óbvia — tudo rodando bem.\n")
+        return
+
+    typer.echo("\n  Oportunidades detectadas")
+    typer.echo("  " + "─" * 42)
+    for f in findings:
+        icon = "⚠" if f["level"] == "warn" else "💡"
+        typer.echo(f"  {icon} {f['title']}")
+        typer.echo(f"    → {f['detail']}\n")
+
+
 def _echo_breakdown(title: str, buckets: dict, total: int) -> None:
     if not buckets or total <= 0:
         return

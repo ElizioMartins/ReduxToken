@@ -107,3 +107,86 @@ def test_sparkline_flat():
 @pytest.mark.parametrize("n,expected", [(1234567, "1.23M"), (3700, "3.70K"), (500, "500")])
 def test_human_number(n, expected):
     assert analytics.human_number(n) == expected
+
+
+def _evs(sid, ts, source, n):
+    return [
+        {**_ev(ts, source=source), "session_id": sid}
+        for _ in range(n)
+    ]
+
+
+def test_session_summaries_most_recent_first():
+    old = datetime(2026, 7, 1, 10, 0, tzinfo=timezone.utc)
+    new = datetime(2026, 7, 3, 15, 30, tzinfo=timezone.utc)
+    events = (
+        _evs("2026-07-01T10:00:00Z-aaaa", old, "cli", 2)
+        + _evs("2026-07-03T15:30:00Z-bbbb", new, "hook", 5)
+    )
+    sessions = analytics.session_summaries(events)
+    assert [s["short_id"] for s in sessions] == ["bbbb", "aaaa"]
+    assert sessions[0]["events"] == 5
+    assert sessions[0]["source"] == "hook"
+    assert sessions[0]["start_str"] == "2026-07-03 15:30"
+
+
+def test_session_dominant_source():
+    ts = datetime(2026, 7, 3, tzinfo=timezone.utc)
+    events = _evs("s-cccc", ts, "proxy", 3) + _evs("s-cccc", ts, "cli", 1)
+    sessions = analytics.session_summaries(events)
+    assert len(sessions) == 1
+    assert sessions[0]["source"] == "proxy"  # dominante
+    assert sessions[0]["events"] == 4
+
+
+def test_by_field_count():
+    ts = datetime(2026, 7, 3, tzinfo=timezone.utc)
+    events = _evs("s", ts, "cli", 3) + _evs("s", ts, "hook", 1)
+    counts = analytics.by_field_count(events, "source")
+    assert list(counts.items())[0] == ("cli", 3)
+
+
+# --- discover ---------------------------------------------------------------
+
+def test_discover_empty():
+    assert analytics.discover([]) == []
+
+
+def test_discover_low_return_source():
+    now = datetime(2026, 7, 3, 12, 0, tzinfo=timezone.utc)
+    # 10 eventos 'cli' com economia baixa (100→95 = 5%)
+    events = [{**_ev(now, source="cli", orig=100, comp=95), "session_id": "s"} for _ in range(10)]
+    findings = analytics.discover(events, now=now)
+    assert any(f["level"] == "warn" and "'cli'" in f["title"] for f in findings)
+
+
+def test_discover_silent_source():
+    now = datetime(2026, 7, 3, 12, 0, tzinfo=timezone.utc)
+    old = now - timedelta(hours=72)  # além das 48h
+    events = [{**_ev(old, source="proxy", orig=100, comp=20), "session_id": "s"} for _ in range(6)]
+    findings = analytics.discover(events, now=now)
+    assert any(f["level"] == "warn" and "48h" in f["title"] for f in findings)
+
+
+def test_discover_high_yield_low_volume():
+    now = datetime(2026, 7, 3, 12, 0, tzinfo=timezone.utc)
+    # 'text' domina o volume; 'log' rende muito mas é pouco volume
+    bulk = [{**_ev(now, source="cli", ctype="text", orig=1000, comp=300), "session_id": "s"} for _ in range(10)]
+    logs = [{**_ev(now, source="hook", ctype="log", orig=100, comp=3), "session_id": "s"} for _ in range(4)]
+    findings = analytics.discover(bulk + logs, now=now)
+    assert any(f["level"] == "tip" and "'log'" in f["title"] for f in findings)
+
+
+def test_discover_cache_underused():
+    now = datetime(2026, 7, 3, 12, 0, tzinfo=timezone.utc)
+    events = [{**_ev(now, source="proxy", orig=100, comp=20, cache=False), "session_id": "s"} for _ in range(40)]
+    findings = analytics.discover(events, now=now)
+    assert any(f["level"] == "tip" and "Cache" in f["title"] for f in findings)
+
+
+def test_discover_healthy_data_no_false_positives():
+    now = datetime(2026, 7, 3, 12, 0, tzinfo=timezone.utc)
+    # boa economia, recente, cache saudável, volume equilibrado
+    events = [{**_ev(now, source="proxy", ctype="json", orig=1000, comp=300, cache=True), "session_id": "s"} for _ in range(20)]
+    findings = analytics.discover(events, now=now)
+    assert findings == []

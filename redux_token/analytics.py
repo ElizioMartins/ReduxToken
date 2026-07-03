@@ -105,6 +105,43 @@ def by_field(events: list[dict], field: str) -> "OrderedDict[str, int]":
     return OrderedDict(sorted(buckets.items(), key=lambda kv: kv[1], reverse=True))
 
 
+def session_summaries(events: list[dict]) -> list[dict]:
+    """Uma linha por ``session_id``, mais recente primeiro. Base do comando ``session``."""
+    groups: dict[str, list[dict]] = defaultdict(list)
+    for e in events:
+        groups[str(e.get("session_id", "?"))].append(e)
+
+    summaries = []
+    for sid, evs in groups.items():
+        agg = aggregate(evs)
+        starts = [ts for ts in (_parse_ts(e.get("ts", "")) for e in evs) if ts is not None]
+        start = min(starts) if starts else None
+        # fonte dominante (a que mais aparece na sessão)
+        source = by_field_count(evs, "source")
+        top_source = next(iter(source), "?")
+        summaries.append({
+            "session_id": sid,
+            "short_id": sid.rsplit("-", 1)[-1] if "-" in sid else sid[:8],
+            "start": start,
+            "start_str": start.strftime("%Y-%m-%d %H:%M") if start else "?",
+            "source": top_source,
+            "events": agg["events"],
+            "tokens_saved": agg["tokens_saved"],
+            "reduction_pct": agg["reduction_pct"],
+        })
+    _floor = datetime.min.replace(tzinfo=timezone.utc)
+    summaries.sort(key=lambda s: s["start"] or _floor, reverse=True)
+    return summaries
+
+
+def by_field_count(events: list[dict], field: str) -> "OrderedDict[str, int]":
+    """Contagem de eventos por valor de um campo, desc (≠ by_field, que soma tokens)."""
+    buckets: dict[str, int] = defaultdict(int)
+    for e in events:
+        buckets[str(e.get(field, "?"))] += 1
+    return OrderedDict(sorted(buckets.items(), key=lambda kv: kv[1], reverse=True))
+
+
 def sparkline(values: list[int]) -> str:
     """Mini-gráfico ASCII usando blocos unicode."""
     if not values:
@@ -114,6 +151,83 @@ def sparkline(values: list[int]) -> str:
         return _BLOCKS[len(_BLOCKS) // 2] * len(values)
     span = hi - lo
     return "".join(_BLOCKS[int((v - lo) / span * (len(_BLOCKS) - 1))] for v in values)
+
+
+# Limiares das regras do 'discover' (constantes p/ facilitar teste/calibração).
+LOW_RETURN_PCT = 20.0       # abaixo disso, a compressão quase não compensa
+LOW_RETURN_SHARE = 0.15     # ...e a fonte representa parcela relevante dos eventos
+SILENT_HOURS = 48           # fonte que sumiu nas últimas N horas
+HIGH_YIELD_PCT = 80.0       # tipo de conteúdo com ótimo retorno
+LOW_VOLUME_SHARE = 0.20     # ...mas pouco volume — oportunidade de captura
+CACHE_MIN_EVENTS = 30       # só avalia cache do proxy com volume mínimo
+CACHE_LOW_RATIO = 0.10      # taxa de cache hit considerada baixa
+
+
+def discover(events: list[dict], now: datetime | None = None) -> list[dict]:
+    """Regras determinísticas que apontam oportunidades perdidas. Base do ``discover``.
+
+    Cada achado é ``{"level": "warn"|"tip", "title": str, "detail": str}``.
+    """
+    now = now or datetime.now(timezone.utc)
+    findings: list[dict] = []
+    if not events:
+        return findings
+
+    total_events = len(events)
+    total_saved = sum(int(e.get("tokens_saved", 0)) for e in events)
+
+    by_src: dict[str, list[dict]] = defaultdict(list)
+    by_type: dict[str, list[dict]] = defaultdict(list)
+    for e in events:
+        by_src[str(e.get("source", "?"))].append(e)
+        by_type[str(e.get("content_type", "?"))].append(e)
+
+    # Regra 1 — fonte com retorno consistentemente baixo.
+    for src, evs in by_src.items():
+        share = len(evs) / total_events
+        agg = aggregate(evs)
+        if len(evs) >= 5 and share >= LOW_RETURN_SHARE and agg["reduction_pct"] < LOW_RETURN_PCT:
+            findings.append({
+                "level": "warn",
+                "title": f"{share * 100:.0f}% dos eventos vêm de '{src}' com economia < {LOW_RETURN_PCT:.0f}%.",
+                "detail": "Esse conteúdo casa mal com os filtros; considere pular compressão de trechos curtos.",
+            })
+
+    # Regra 2 — fonte que parou de reportar (tinha eventos antigos, nenhum recente).
+    cutoff = now - timedelta(hours=SILENT_HOURS)
+    for src, evs in by_src.items():
+        ts_list = [ts for ts in (_parse_ts(e.get("ts", "")) for e in evs) if ts is not None]
+        if len(evs) >= 5 and ts_list and max(ts_list) < cutoff:
+            findings.append({
+                "level": "warn",
+                "title": f"Nenhum evento de '{src}' nas últimas {SILENT_HOURS}h.",
+                "detail": "Essa integração pode ter caído. Rode 'redux-token doctor'.",
+            })
+
+    # Regra 3 — tipo de alto retorno mas baixo volume (vale capturar mais).
+    for ctype, evs in by_type.items():
+        agg = aggregate(evs)
+        share = (agg["tokens_saved"] / total_saved) if total_saved else 0.0
+        if len(evs) >= 3 and agg["reduction_pct"] >= HIGH_YIELD_PCT and share < LOW_VOLUME_SHARE:
+            findings.append({
+                "level": "tip",
+                "title": f"'{ctype}' rende {agg['reduction_pct']:.0f}% mas é só {share * 100:.0f}% do volume.",
+                "detail": "Ative o hook no seu agente para capturar mais desse conteúdo automaticamente.",
+            })
+
+    # Regra 4 — cache do proxy subutilizado.
+    proxy_evs = by_src.get("proxy", [])
+    if len(proxy_evs) >= CACHE_MIN_EVENTS:
+        hits = sum(1 for e in proxy_evs if e.get("from_cache"))
+        ratio = hits / len(proxy_evs)
+        if ratio < CACHE_LOW_RATIO:
+            findings.append({
+                "level": "tip",
+                "title": f"Cache do proxy em {ratio * 100:.0f}% de hits ({len(proxy_evs)} requests).",
+                "detail": "Conteúdo repetido não está reaproveitando o cache — verifique variação nos prompts.",
+            })
+
+    return findings
 
 
 def human_number(n: float) -> str:

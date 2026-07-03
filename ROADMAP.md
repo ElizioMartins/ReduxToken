@@ -55,8 +55,8 @@ Design detalhado em [ANALYTICS.md](ANALYTICS.md).
 - [x] `telemetry.py` (lib/CLI/hook/MCP) + `events.rs` (proxy) escrevendo o mesmo schema
 - [x] Instrumentar os 5 pontos de compressão (lib, CLI, proxy, hook, MCP)
 - [x] `redux-token gain` — histórico + gráfico ASCII (sparkline) + breakdown por fonte/tipo
-- [ ] `redux-token session` — adoção agrupada por `session_id`
-- [ ] `redux-token discover` — regras determinísticas de oportunidade perdida
+- [x] `redux-token session` — adoção agrupada por `session_id`
+- [x] `redux-token discover` — regras determinísticas de oportunidade perdida
 - [ ] `redux-token doctor` — health check dos 5 pontos (do Headroom)
 - [ ] Migrar `redux-token report` para ler do event log
 - [ ] Opt-out via `REDUX_TOKEN_NO_STATS` / config; nunca sai da máquina
