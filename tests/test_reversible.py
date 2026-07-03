@@ -56,15 +56,25 @@ def test_retrieve_alias(isolated_home):
     assert reversible.retrieve(ref) == "conteúdo x"
 
 
-def test_reversible_compress_appends_marker_and_roundtrips(isolated_home):
+def test_reversible_recovers_removed_comment(isolated_home):
     rt = ReduxToken(reversible=True)
-    original = "[DEBUG] x\n" * 20 + "linha real que fica"
-    compressed, stats = rt.compress(original)
-    assert stats.tokens_saved > 0
+    original = "let x = 1; // segredo importante\nlet y = 2;"
+    compressed, _ = rt.compress(original)
     refs = reversible.find_refs(compressed)
-    assert len(refs) == 1
-    # o marcador recupera exatamente o texto original passado ao compress
-    assert reversible.get(refs[0]) == original
+    assert refs, "deveria haver ao menos um marcador"
+    recovered = "\n".join(reversible.get(r) for r in refs)
+    assert "segredo importante" in recovered
+    assert "segredo importante" not in compressed  # removido do texto visível
+
+
+def test_reversible_collapses_consecutive_debug_block(isolated_home):
+    rt = ReduxToken(reversible=True)
+    original = "[DEBUG] a\n[DEBUG] b\n[DEBUG] c\nreal"
+    compressed, _ = rt.compress(original)
+    refs = reversible.find_refs(compressed)
+    assert len(refs) == 1  # bloco consecutivo vira um único marcador
+    assert reversible.get(refs[0]) == "[DEBUG] a\n[DEBUG] b\n[DEBUG] c"
+    assert "real" in compressed
 
 
 def test_non_reversible_compress_has_no_marker(isolated_home):

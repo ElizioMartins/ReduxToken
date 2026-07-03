@@ -1,4 +1,5 @@
 use crate::filters::{Filter, code::CodeFilter, json::JsonFilter, smart::SmartFilter, text::TextFilter};
+use crate::rev::RevCollector;
 use crate::stats::{CompressionStats, Timer, count_tokens};
 
 pub struct Compressor {
@@ -12,30 +13,43 @@ impl Compressor {
 
     pub fn compress(&self, input: &str) -> (String, CompressionStats) {
         let timer = Timer::start();
-        let original_tokens = count_tokens(input);
-
         let mut text = input.to_string();
         for filter in &self.filters {
             text = filter.apply(&text);
         }
-
-        let compressed_tokens = count_tokens(&text);
-        let tokens_saved = original_tokens.saturating_sub(compressed_tokens);
-        let savings_pct = if original_tokens > 0 {
-            tokens_saved as f64 / original_tokens as f64 * 100.0
-        } else {
-            0.0
-        };
-
-        let stats = CompressionStats {
-            original_tokens,
-            compressed_tokens,
-            tokens_saved,
-            savings_pct,
-            time_ms: timer.elapsed_ms(),
-        };
-
+        let stats = build_stats(input, &text, timer);
         (text, stats)
+    }
+
+    /// Compressão reversível (CCR): filtros que suportam trocam o trecho removido por
+    /// um marcador e o registram. Devolve também os pares (ref, original) extraídos.
+    pub fn compress_rev(&self, input: &str) -> (String, CompressionStats, Vec<(String, String)>) {
+        let timer = Timer::start();
+        let mut rc = RevCollector::new();
+        let mut text = input.to_string();
+        for filter in &self.filters {
+            text = filter.apply_rev(&text, &mut rc);
+        }
+        let stats = build_stats(input, &text, timer);
+        (text, stats, rc.into_spans())
+    }
+}
+
+fn build_stats(input: &str, output: &str, timer: Timer) -> CompressionStats {
+    let original_tokens = count_tokens(input);
+    let compressed_tokens = count_tokens(output);
+    let tokens_saved = original_tokens.saturating_sub(compressed_tokens);
+    let savings_pct = if original_tokens > 0 {
+        tokens_saved as f64 / original_tokens as f64 * 100.0
+    } else {
+        0.0
+    };
+    CompressionStats {
+        original_tokens,
+        compressed_tokens,
+        tokens_saved,
+        savings_pct,
+        time_ms: timer.elapsed_ms(),
     }
 }
 

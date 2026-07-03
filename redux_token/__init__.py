@@ -35,18 +35,23 @@ class ReduxToken:
         self._reversible = reversible
 
     def compress(self, text: str) -> tuple[str, CompressionStats]:
-        result, stats = self._compressor.compress(text)
-        for fn in self._extra:
-            result = fn(result)
-        if self._reversible and stats.tokens_saved > 0:
-            # CCR: guarda o original e sinaliza com um marcador recuperável.
+        if self._reversible:
+            # CCR: o core troca cada trecho removido por um marcador ⟦rdx:ref⟧ e
+            # devolve os pares (ref, original) para guardarmos no store local.
+            result, stats, spans = self._compressor.compress_reversible(text)
+            for fn in self._extra:
+                result = fn(result)
             try:
                 from redux_token import reversible as _rev
 
-                ref = _rev.put(text)
-                result = f"{result}\n{_rev.make_marker(ref)}"
+                for _ref, span in spans:
+                    _rev.put(span)
             except Exception:
                 pass
+        else:
+            result, stats = self._compressor.compress(text)
+            for fn in self._extra:
+                result = fn(result)
         try:
             from redux_token import telemetry
 

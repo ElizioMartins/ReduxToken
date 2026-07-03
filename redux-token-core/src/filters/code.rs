@@ -1,4 +1,5 @@
 use super::Filter;
+use crate::rev::RevCollector;
 use regex::Regex;
 use std::sync::OnceLock;
 
@@ -21,22 +22,34 @@ impl Filter for CodeFilter {
         let s = block_re().replace_all(input, "").to_string();
         // Remove // line comments
         let s = line_re().replace_all(&s, "").to_string();
-
-        // Collapse multiple blank lines into one
-        let mut out = String::with_capacity(s.len());
-        let mut prev_blank = false;
-        for line in s.lines() {
-            let blank = line.trim().is_empty();
-            if blank && prev_blank {
-                continue;
-            }
-            out.push_str(line);
-            out.push('\n');
-            prev_blank = blank;
-        }
-
-        out.trim_end().to_string()
+        collapse_blank_lines(&s)
     }
+
+    fn apply_rev(&self, input: &str, rc: &mut RevCollector) -> String {
+        // Troca cada comentário por um marcador recuperável em vez de apagá-lo.
+        let s = block_re()
+            .replace_all(input, |caps: &regex::Captures| rc.stash(&caps[0]))
+            .to_string();
+        let s = line_re()
+            .replace_all(&s, |caps: &regex::Captures| rc.stash(caps[0].trim_start()))
+            .to_string();
+        collapse_blank_lines(&s)
+    }
+}
+
+fn collapse_blank_lines(s: &str) -> String {
+    let mut out = String::with_capacity(s.len());
+    let mut prev_blank = false;
+    for line in s.lines() {
+        let blank = line.trim().is_empty();
+        if blank && prev_blank {
+            continue;
+        }
+        out.push_str(line);
+        out.push('\n');
+        prev_blank = blank;
+    }
+    out.trim_end().to_string()
 }
 
 #[cfg(test)]

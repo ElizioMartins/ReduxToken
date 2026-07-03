@@ -1073,6 +1073,7 @@ dependencies = [
  "pyo3",
  "regex",
  "serde_json",
+ "sha2",
 ]
 
 [[package]]
