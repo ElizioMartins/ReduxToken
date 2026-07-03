@@ -26,7 +26,7 @@ def main() -> None:
 
     try:
         from redux_token import ReduxToken
-        compressed, stats = ReduxToken().compress(response)
+        compressed, stats = ReduxToken(source="hook").compress(response)
         if stats.tokens_saved > 0:
             print(json.dumps({"tool_response": compressed}))
     except Exception:

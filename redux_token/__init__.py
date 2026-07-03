@@ -23,14 +23,25 @@ class ReduxToken:
         compressed, stats = rt.compress(text)
     """
 
-    def __init__(self, extra_filters: list[FilterFn] | None = None) -> None:
+    def __init__(
+        self,
+        extra_filters: list[FilterFn] | None = None,
+        source: str = "lib",
+    ) -> None:
         self._compressor = PyCompressor()
         self._extra: list[FilterFn] = extra_filters or []
+        self._source = source
 
     def compress(self, text: str) -> tuple[str, CompressionStats]:
         result, stats = self._compressor.compress(text)
         for fn in self._extra:
             result = fn(result)
+        try:
+            from redux_token import telemetry
+
+            telemetry.record(self._source, stats, text)
+        except Exception:
+            pass
         return result, stats
 
     def add_filter(self, fn: FilterFn) -> None:

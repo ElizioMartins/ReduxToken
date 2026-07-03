@@ -15,7 +15,7 @@ mcp = FastMCP(
     ),
 )
 
-_rt = ReduxToken()
+_rt = ReduxToken(source="mcp")
 
 
 @mcp.tool()

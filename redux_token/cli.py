@@ -15,7 +15,7 @@ _rt = None
 def get_rt() -> ReduxToken:
     global _rt
     if _rt is None:
-        _rt = ReduxToken()
+        _rt = ReduxToken(source="cli")
     return _rt
 
 

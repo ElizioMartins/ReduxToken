@@ -129,11 +129,21 @@ fn do_compress(
 ) -> String {
     let key = CompressionCache::key(text);
     if let Some(cached) = cache.get(&key) {
-        stats.add_tokens(count_tokens(text) as u64, count_tokens(&cached) as u64, true);
+        let orig = count_tokens(text) as u64;
+        let comp = count_tokens(&cached) as u64;
+        stats.add_tokens(orig, comp, true);
+        crate::events::record(text, orig, comp, 0.0, true);
         return cached;
     }
     let (compressed, cs) = compressor.compress(text);
     stats.add_tokens(cs.original_tokens as u64, cs.compressed_tokens as u64, false);
+    crate::events::record(
+        text,
+        cs.original_tokens as u64,
+        cs.compressed_tokens as u64,
+        cs.time_ms,
+        false,
+    );
     cache.insert(key, compressed.clone());
     compressed
 }

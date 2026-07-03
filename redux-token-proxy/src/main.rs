@@ -4,6 +4,7 @@ use tokio::net::TcpListener;
 
 mod cache;
 mod config;
+mod events;
 mod proxy;
 mod stats;
 

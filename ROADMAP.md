@@ -45,11 +45,51 @@ Objetivo: funcionar como hook dentro de ferramentas de dev.
 - [x] MCP Server com tools `compress`, `compress_file`, `estimate_cost`
 - [x] Compatível com Claude Desktop, Cursor, Zed e qualquer cliente MCP
 
+## Fase 5 — Observabilidade & Economia  ⭐ prioridade
+
+Objetivo: fazer o usuário **enxergar** a economia (tokens + $) com histórico, não só por
+chamada. Fecha a maior lacuna vs. RTK (`gain`/`discover`/`session`) e Headroom (`dashboard`).
+Design detalhado em [ANALYTICS.md](ANALYTICS.md).
+
+- [x] Event log unificado `~/.redux-token/events.jsonl` (append-only, local)
+- [x] `telemetry.py` (lib/CLI/hook/MCP) + `events.rs` (proxy) escrevendo o mesmo schema
+- [x] Instrumentar os 5 pontos de compressão (lib, CLI, proxy, hook, MCP)
+- [ ] `redux-token gain` — histórico + gráfico ASCII (sparkline) + breakdown por fonte/tipo
+- [ ] `redux-token session` — adoção agrupada por `session_id`
+- [ ] `redux-token discover` — regras determinísticas de oportunidade perdida
+- [ ] `redux-token doctor` — health check dos 5 pontos (do Headroom)
+- [ ] Migrar `redux-token report` para ler do event log
+- [ ] Opt-out via `REDUX_TOKEN_NO_STATS` / config; nunca sai da máquina
+
+## Fase 6 — Compressão reversível (CCR)
+
+Objetivo: comprimir de forma agressiva **sem perder informação** — original em cache, o
+modelo recupera sob demanda. Maior alavanca técnica vinda do Headroom.
+
+- [ ] Estender `CompressionCache` para guardar o original (não só o comprimido)
+- [ ] Tool MCP `retrieve` + endpoint proxy para reidratar trechos comprimidos
+- [ ] TTL configurável do cache reversível
+- [ ] Marcadores no texto comprimido apontando o que pode ser recuperado
+
+## Fase 7 — Filtros de nova geração
+
+Objetivo: subir de regex para compressão com consciência de estrutura, mantendo a
+identidade determinística/auditável (sem modelo ML opaco).
+
+- [ ] `CodeFilter` AST-aware (começar por Python via tree-sitter/`syn`)
+- [ ] `JsonFilter` inteligente (resumir arrays de dicts / objetos aninhados)
+- [ ] Hook `PreToolUse` experimental p/ 2–3 comandos ruidosos (`git status`, `ls`, `grep`)
+- [ ] Benchmark de **acurácia preservada** (não só % de tokens) — credibilidade
+
 ## Fora do escopo por ora
 
-- Dashboard web
-- Modelo ML de compressão (pode virar projeto separado)
+- Dashboard web (a CLI expõe `gain --json`; um dashboard fica desacoplado e opcional)
+- Modelo ML de compressão treinado (nosso diferencial é ser determinístico/auditável)
+- Otimização de KV cache nativo do provider (CacheAligner) — avaliar após Fase 6
 - Suporte a streaming de tokens
+- Memória cross-agente
+
+Análises que embasam as fases 5–7: [ESTUDO_RTK.md](ESTUDO_RTK.md), [ESTUDO_HEADROOM.md](ESTUDO_HEADROOM.md).
 
 ---
 
