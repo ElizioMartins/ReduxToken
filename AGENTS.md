@@ -29,10 +29,13 @@ Os arquivos `.md` evoluem junto com o código — não são criados uma vez e es
 
 Isso facilita contribuidores entenderem o projeto sem precisar ler o histórico de commits.
 
-**Docs internos (não versionados):** o repositório é **público**. Documentos de
-planejamento, estudo de concorrentes e notas de design ficam em `docs/internal/`, que é
-ignorada pelo git (`.gitignore`). Nunca versione esse conteúdo nem crie links públicos
-(README/ROADMAP) apontando para lá — os links quebrariam e vazariam estratégia.
+**Docs internos (privados):** o repositório é **público**. Documentos de planejamento,
+estudo de concorrentes e notas de design ficam em `docs/internal/`, que é um **submodule**
+apontando para o repo **privado** `ReduxToken-internal`. Numa máquina nova, traga-os com
+`git clone --recursive` ou `git submodule update --init`. Escreva/edite esses docs dentro
+de `docs/internal/` e **commite/push no submodule** (repo privado); depois, se o ponteiro
+mudou, commite o gitlink no repo principal. Nunca crie links públicos (README/ROADMAP)
+apontando para esse conteúdo — vazariam estratégia.
 
 ## Convenções de código
 
