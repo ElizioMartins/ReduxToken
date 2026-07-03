@@ -6,6 +6,7 @@ mod cache;
 mod config;
 mod events;
 mod proxy;
+mod reversible;
 mod stats;
 
 use cache::CompressionCache;

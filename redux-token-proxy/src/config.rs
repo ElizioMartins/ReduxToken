@@ -5,11 +5,21 @@ use std::path::Path;
 pub struct Config {
     pub server: ServerConfig,
     pub providers: Vec<ProviderConfig>,
+    #[serde(default)]
+    pub reversible: ReversibleConfig,
 }
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct ServerConfig {
     pub port: u16,
+}
+
+/// Compressão reversível (CCR): guarda trechos removidos e insere marcadores
+/// `⟦rdx:ref⟧` recuperáveis via a tool MCP `retrieve` (store compartilhado em disco).
+#[derive(Debug, Clone, Deserialize, Default)]
+pub struct ReversibleConfig {
+    #[serde(default)]
+    pub enabled: bool,
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -30,6 +40,7 @@ impl Default for Config {
     fn default() -> Self {
         Config {
             server: ServerConfig { port: 8080 },
+            reversible: ReversibleConfig::default(),
             providers: vec![
                 ProviderConfig {
                     name: "openai".to_string(),

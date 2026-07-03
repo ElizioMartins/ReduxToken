@@ -76,7 +76,8 @@ fn maybe_compress(state: &AppState, bytes: &[u8]) -> Vec<u8> {
     let Ok(mut json) = serde_json::from_slice::<Value>(bytes) else {
         return bytes.to_vec();
     };
-    if compress_messages(&mut json, &state.compressor, &state.cache, &state.stats) {
+    let reversible = state.config.reversible.enabled;
+    if compress_messages(&mut json, &state.compressor, &state.cache, &state.stats, reversible) {
         serde_json::to_vec(&json).unwrap_or_else(|_| bytes.to_vec())
     } else {
         bytes.to_vec()
@@ -88,6 +89,7 @@ fn compress_messages(
     compressor: &Compressor,
     cache: &CompressionCache,
     stats: &SessionStats,
+    reversible: bool,
 ) -> bool {
     let Some(messages) = body.get_mut("messages").and_then(|m| m.as_array_mut()) else {
         return false;
@@ -96,7 +98,7 @@ fn compress_messages(
     for msg in messages.iter_mut() {
         match msg.get_mut("content") {
             Some(Value::String(s)) => {
-                let compressed = do_compress(s, compressor, cache, stats);
+                let compressed = do_compress(s, compressor, cache, stats, reversible);
                 if compressed != *s {
                     *s = compressed;
                     changed = true;
@@ -106,7 +108,7 @@ fn compress_messages(
                 for part in parts.iter_mut() {
                     if part.get("type").and_then(|t| t.as_str()) == Some("text") {
                         if let Some(Value::String(s)) = part.get_mut("text") {
-                            let compressed = do_compress(s, compressor, cache, stats);
+                            let compressed = do_compress(s, compressor, cache, stats, reversible);
                             if compressed != *s {
                                 *s = compressed;
                                 changed = true;
@@ -126,6 +128,7 @@ fn do_compress(
     compressor: &Compressor,
     cache: &CompressionCache,
     stats: &SessionStats,
+    reversible: bool,
 ) -> String {
     let key = CompressionCache::key(text);
     if let Some(cached) = cache.get(&key) {
@@ -135,7 +138,16 @@ fn do_compress(
         crate::events::record(text, orig, comp, 0.0, true);
         return cached;
     }
-    let (compressed, cs) = compressor.compress(text);
+    let (compressed, cs) = if reversible {
+        // CCR: guarda cada trecho no store compartilhado e insere marcadores.
+        let (c, cs, spans) = compressor.compress_rev(text);
+        for (reference, span) in &spans {
+            crate::reversible::put(reference, span);
+        }
+        (c, cs)
+    } else {
+        compressor.compress(text)
+    };
     stats.add_tokens(cs.original_tokens as u64, cs.compressed_tokens as u64, false);
     crate::events::record(
         text,

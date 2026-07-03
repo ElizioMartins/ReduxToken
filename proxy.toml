@@ -1,6 +1,12 @@
 [server]
 port = 8080
 
+# Compressão reversível (CCR): guarda os trechos removidos em
+# ~/.redux-token/reversible/ e insere marcadores ⟦rdx:ref⟧ recuperáveis pela tool
+# MCP `retrieve`. Útil quando o agente também usa o MCP do ReduxToken.
+[reversible]
+enabled = false
+
 # Cada provider mapeia um prefixo de URL para o host real da API.
 # Exemplo: POST http://localhost:8080/openai/v1/chat/completions
 #          → comprime content → encaminha para https://api.openai.com/v1/chat/completions

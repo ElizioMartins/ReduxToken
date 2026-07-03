@@ -28,15 +28,21 @@ fn disabled() -> bool {
     std::env::var("REDUX_TOKEN_NO_STATS").as_deref() == Ok("1")
 }
 
-fn log_path() -> Option<PathBuf> {
+/// Diretório base do ReduxToken (`~/.redux-token` ou `REDUX_TOKEN_HOME`).
+/// Compartilhado pelo event log e pelo store reversível.
+pub fn home_dir() -> Option<PathBuf> {
     if let Ok(home) = std::env::var("REDUX_TOKEN_HOME") {
-        return Some(PathBuf::from(home).join("events.jsonl"));
+        return Some(PathBuf::from(home));
     }
     // HOME no Unix, USERPROFILE no Windows — evita depender do crate `dirs`.
     let home = std::env::var("HOME")
         .or_else(|_| std::env::var("USERPROFILE"))
         .ok()?;
-    Some(PathBuf::from(home).join(".redux-token").join("events.jsonl"))
+    Some(PathBuf::from(home).join(".redux-token"))
+}
+
+fn log_path() -> Option<PathBuf> {
+    Some(home_dir()?.join("events.jsonl"))
 }
 
 /// Heurística barata de tipo de conteúdo (espelha `telemetry.detect_content_type`).
