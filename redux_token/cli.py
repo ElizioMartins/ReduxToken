@@ -258,6 +258,36 @@ def discover(
         typer.echo(f"    → {f['detail']}\n")
 
 
+@app.command()
+def doctor(
+    as_json: bool = typer.Option(False, "--json", help="Saída JSON para scripts"),
+) -> None:
+    """Verifica se os 5 pontos (core, event log, hook, proxy, MCP) estão roteando."""
+    from redux_token import doctor as _doctor
+
+    checks = _doctor.run_checks()
+
+    if as_json:
+        typer.echo(json.dumps(checks))
+        raise typer.Exit(1 if any(c["status"] == "fail" for c in checks) else 0)
+
+    icons = {"ok": "✓", "warn": "⚠", "fail": "✗"}
+    typer.echo("\n  ReduxToken — diagnóstico")
+    typer.echo("  " + "─" * 42)
+    for c in checks:
+        typer.echo(f"  {icons.get(c['status'], '?')} {c['name']:<18} {c['detail']}")
+
+    fails = sum(1 for c in checks if c["status"] == "fail")
+    warns = sum(1 for c in checks if c["status"] == "warn")
+    if fails:
+        typer.echo(f"\n  {fails} problema(s) crítico(s). Veja acima.\n")
+    elif warns:
+        typer.echo(f"\n  Tudo essencial ok — {warns} item(ns) opcional(is) inativo(s).\n")
+    else:
+        typer.echo("\n  Tudo em ordem. ✓\n")
+    raise typer.Exit(1 if fails else 0)
+
+
 def _echo_breakdown(title: str, buckets: dict, total: int) -> None:
     if not buckets or total <= 0:
         return
