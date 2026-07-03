@@ -33,11 +33,20 @@ Isso facilita contribuidores entenderem o projeto sem precisar ler o histórico 
 
 - Filtros em Rust implementam o trait `Filter`. Ao criar um novo filtro, implemente o trait e registre no `Compressor::default()`.
 - `CompressionStats` é retornado por toda compressão. Não remova campos — quebraria bindings Python.
-- A CLI usa `typer`. Comandos disponíveis: `compress`, `cost`, `watch`, `report`. Novos subcomandos seguem o padrão `@app.command()`.
+- A CLI usa `typer`. Comandos disponíveis: `compress`, `cost`, `watch`, `report`, `gain`, `session`, `discover`. Novos subcomandos seguem o padrão `@app.command()`.
 - `hook.py` é o PostToolUse hook para Claude Code — nunca levante exceções sem capturar; falha silenciosa é o comportamento correto.
 - `ReduxToken(extra_filters=[...])` aceita funções Python `str -> str` que rodam após o core Rust.
 - Testes unitários dos filtros Rust ficam inline (`#[cfg(test)]` em cada arquivo). Testes de integração Python ficam em `tests/`.
 - Não adicione dependências Rust pesadas sem justificativa no ARCHITECTURE.md.
+
+## Git e commits
+
+- **Commits pequenos e focados.** Cada commit deve conter uma mudança lógica coesa —
+  facilita identificar a origem de possíveis erros (`git bisect`, revisão) e reverter algo
+  sem arrastar código não relacionado. Prefira vários commits pequenos a um grande.
+- Separe por natureza: docs num commit, implementação em outro; uma feature por commit.
+- Rode os testes (`pytest -q`) antes de commitar; o commit deve deixar a árvore verde.
+- Mensagens no padrão `tipo(escopo): resumo` (ex.: `feat(cli):`, `fix:`, `docs:`).
 
 ## Linguagem
 
