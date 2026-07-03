@@ -49,7 +49,6 @@ Objetivo: funcionar como hook dentro de ferramentas de dev.
 
 Objetivo: fazer o usuário **enxergar** a economia (tokens + $) com histórico, não só por
 chamada. Fecha a maior lacuna vs. RTK (`gain`/`discover`/`session`) e Headroom (`dashboard`).
-Design detalhado em [ANALYTICS.md](ANALYTICS.md).
 
 - [x] Event log unificado `~/.redux-token/events.jsonl` (append-only, local)
 - [x] `telemetry.py` (lib/CLI/hook/MCP) + `events.rs` (proxy) escrevendo o mesmo schema
@@ -88,8 +87,6 @@ identidade determinística/auditável (sem modelo ML opaco).
 - Otimização de KV cache nativo do provider (CacheAligner) — avaliar após Fase 6
 - Suporte a streaming de tokens
 - Memória cross-agente
-
-Análises que embasam as fases 5–7: [ESTUDO_RTK.md](ESTUDO_RTK.md), [ESTUDO_HEADROOM.md](ESTUDO_HEADROOM.md).
 
 ---
 

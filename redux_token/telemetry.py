@@ -4,7 +4,7 @@ Todos os pontos de compressão em Python (biblioteca, CLI, hook, MCP) chamam
 ``record()`` para gravar uma linha JSONL em ``~/.redux-token/events.jsonl``. O proxy
 Rust grava no mesmo arquivo e no mesmo schema (ver ``redux-token-proxy/src/events.rs``).
 
-Princípios (ver ANALYTICS.md):
+Princípios (ver docs/internal/ANALYTICS.md — nota de design não versionada):
 - **Local-first**: nunca sai da máquina.
 - **Opt-out**: ligado por padrão; ``REDUX_TOKEN_NO_STATS=1`` desliga.
 - **Nunca quebra o chamador**: qualquer erro é engolido silenciosamente.

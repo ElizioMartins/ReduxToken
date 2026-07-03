@@ -29,6 +29,11 @@ Os arquivos `.md` evoluem junto com o código — não são criados uma vez e es
 
 Isso facilita contribuidores entenderem o projeto sem precisar ler o histórico de commits.
 
+**Docs internos (não versionados):** o repositório é **público**. Documentos de
+planejamento, estudo de concorrentes e notas de design ficam em `docs/internal/`, que é
+ignorada pelo git (`.gitignore`). Nunca versione esse conteúdo nem crie links públicos
+(README/ROADMAP) apontando para lá — os links quebrariam e vazariam estratégia.
+
 ## Convenções de código
 
 - Filtros em Rust implementam o trait `Filter`. Ao criar um novo filtro, implemente o trait e registre no `Compressor::default()`.
