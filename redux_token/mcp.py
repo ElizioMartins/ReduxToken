@@ -11,18 +11,24 @@ mcp = FastMCP(
         "Compressor inteligente de tokens para LLMs. "
         "Use 'compress' para reduzir texto antes de incluir no contexto, "
         "'compress_file' para comprimir arquivos grandes, "
-        "e 'estimate_cost' para calcular economia financeira."
+        "'estimate_cost' para calcular economia financeira, "
+        "e 'retrieve' para recuperar o original de um marcador ⟦rdx:ref⟧ "
+        "quando a compressão foi reversível."
     ),
 )
 
 _rt = ReduxToken(source="mcp")
+_rt_rev = ReduxToken(source="mcp", reversible=True)
 
 
 @mcp.tool()
-def compress(text: str) -> str:
+def compress(text: str, reversible: bool = False) -> str:
     """Comprime texto removendo ruído (linhas DEBUG/TRACE, comentários, metadados JSON,
-    duplicatas) antes de incluir no contexto do modelo. Economiza 60-97% de tokens."""
-    compressed, stats = _rt.compress(text)
+    duplicatas) antes de incluir no contexto do modelo. Economiza 60-97% de tokens.
+
+    Com reversible=True, anexa um marcador ⟦rdx:ref⟧ e guarda o original; use a tool
+    'retrieve' com esse ref se precisar do conteúdo completo depois."""
+    compressed, stats = (_rt_rev if reversible else _rt).compress(text)
     lines = [compressed]
     if stats.tokens_saved > 0:
         lines.append(f"\n[redux-token] {stats.tokens_saved} tokens economizados ({stats.savings_pct:.1f}%)")
@@ -30,19 +36,31 @@ def compress(text: str) -> str:
 
 
 @mcp.tool()
-def compress_file(path: str) -> str:
+def compress_file(path: str, reversible: bool = False) -> str:
     """Lê um arquivo do disco e comprime seu conteúdo. Útil para logs, JSONs e
-    código-fonte grandes antes de incluir no contexto."""
+    código-fonte grandes antes de incluir no contexto. Veja 'compress' sobre reversible."""
     try:
         with open(path, encoding="utf-8", errors="replace") as f:
             text = f.read()
     except OSError as e:
         return f"Erro ao ler arquivo: {e}"
-    compressed, stats = _rt.compress(text)
+    compressed, stats = (_rt_rev if reversible else _rt).compress(text)
     lines = [compressed]
     if stats.tokens_saved > 0:
         lines.append(f"\n[redux-token] {stats.tokens_saved} tokens economizados ({stats.savings_pct:.1f}%) — arquivo: {path}")
     return "\n".join(lines)
+
+
+@mcp.tool()
+def retrieve(ref: str) -> str:
+    """Recupera o conteúdo original de um marcador de compressão reversível.
+    Aceita o ref puro (ex.: 'a1b2c3d4e5f6') ou o marcador completo '⟦rdx:...⟧'."""
+    from redux_token import reversible as _rev
+
+    original = _rev.retrieve(ref)
+    if original is None:
+        return f"[redux-token] ref não encontrado ou expirado: {ref}"
+    return original
 
 
 @mcp.tool()

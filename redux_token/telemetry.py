@@ -30,11 +30,18 @@ def _disabled() -> bool:
     return os.environ.get("REDUX_TOKEN_NO_STATS") == "1"
 
 
+def home_dir() -> Path:
+    """Diretório base do ReduxToken (``~/.redux-token`` ou ``REDUX_TOKEN_HOME``).
+
+    Compartilhado por todos os dados locais: event log, store reversível, etc.
+    """
+    override = os.environ.get("REDUX_TOKEN_HOME")
+    return Path(override) if override else Path.home() / ".redux-token"
+
+
 def log_path() -> Path:
     """Caminho do event log. Respeita ``REDUX_TOKEN_HOME`` (usado em testes)."""
-    override = os.environ.get("REDUX_TOKEN_HOME")
-    base = Path(override) if override else Path.home() / ".redux-token"
-    return base / "events.jsonl"
+    return home_dir() / "events.jsonl"
 
 
 def _now() -> str:
