@@ -88,6 +88,29 @@ rt = ReduxToken(extra_filters=[remove_urls, remove_emails])
 compressed, stats = rt.compress(text)
 ```
 
+## Compressão reversível (CCR)
+
+Por padrão a compressão é destrutiva — o que é removido some. Com `reversible=True`, o
+conteúdo original é guardado num store local e o texto comprimido recebe um marcador
+`⟦rdx:ref⟧`. Se o modelo precisar do detalhe, ele **recupera sob demanda**:
+
+```python
+from redux_token import ReduxToken, reversible
+
+rt = ReduxToken(reversible=True)
+compressed, stats = rt.compress(codigo_com_comentarios)
+# compressed termina com um marcador, ex.: ⟦rdx:2814d23e2ead⟧
+
+ref = reversible.find_refs(compressed)[0]
+original = reversible.retrieve(ref)   # devolve o conteúdo original exato
+```
+
+Isso permite comprimir de forma bem mais agressiva sem medo de perder informação. O store
+fica em `~/.redux-token/reversible/` (content-addressed, determinístico e local).
+
+> No MCP, use a tool `retrieve` com o `ref`. Em modo proxy puro o marcador é apenas um
+> sinal — a recuperação depende do agente ter acesso à tool `retrieve`.
+
 ## Proxy HTTP (transparente)
 
 Intercepta requests para OpenAI/Claude e comprime automaticamente sem alterar o código da aplicação:
@@ -166,9 +189,10 @@ Edite o arquivo de configuração:
 
 | Ferramenta | O que faz |
 |---|---|
-| `compress` | Comprime texto — remove DEBUG, comentários, metadados JSON, duplicatas |
+| `compress` | Comprime texto — remove DEBUG, comentários, metadados JSON, duplicatas (opção `reversible`) |
 | `compress_file` | Lê um arquivo do disco e comprime |
 | `estimate_cost` | Calcula economia financeira dado o volume de tokens |
+| `retrieve` | Recupera o original de um marcador `⟦rdx:ref⟧` (compressão reversível) |
 
 ## Instalação para desenvolvimento
 
