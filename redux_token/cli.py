@@ -146,5 +146,75 @@ def report(
     )
 
 
+@app.command()
+def gain(
+    since: str = typer.Option("7d", "--since", "-s", help="Janela: 24h, 7d, 30d, all"),
+    price: float = typer.Option(0.003, help="Custo por 1k tokens (USD)"),
+    as_json: bool = typer.Option(False, "--json", help="Saída JSON para scripts"),
+) -> None:
+    """Mostra a economia acumulada (tokens + $) com histórico e breakdown."""
+    from redux_token import analytics
+
+    try:
+        delta = analytics.parse_since(since)
+    except ValueError as e:
+        typer.echo(str(e), err=True)
+        raise typer.Exit(1)
+
+    events = analytics.filter_since(analytics.load_events(), delta)
+    agg = analytics.aggregate(events)
+    savings_usd = agg["tokens_saved"] * price / 1000
+
+    if as_json:
+        typer.echo(json.dumps({**agg, "savings_usd": savings_usd, "since": since}))
+        return
+
+    if agg["events"] == 0:
+        typer.echo("Nenhum evento registrado nessa janela ainda.")
+        typer.echo("Use o ReduxToken (CLI, hook, proxy ou MCP) e volte aqui.")
+        return
+
+    label = "todo o período" if delta is None else f"últimos {since}"
+    hn = analytics.human_number
+    typer.echo(f"\n  ReduxToken — economia ({label})")
+    typer.echo("  " + "─" * 42)
+    typer.echo(
+        f"  Tokens economizados   {hn(agg['tokens_saved']):>7}  "
+        f"(de {hn(agg['original_tokens'])} → {hn(agg['compressed_tokens'])})"
+    )
+    typer.echo(f"  Economia estimada     ${savings_usd:>6.2f}   (@ ${price}/1k)")
+    typer.echo(f"  Redução média         {agg['reduction_pct']:>5.1f}%")
+    typer.echo(f"  Eventos               {agg['events']:>7}  (cache hits: {agg['cache_hits']})")
+
+    days = analytics.by_day(events)
+    if len(days) > 1:
+        spark = analytics.sparkline(list(days.values()))
+        typer.echo(f"\n  Por dia  {spark}  ({next(iter(days))} → {next(reversed(days))})")
+
+    _echo_breakdown("Por fonte", analytics.by_field(events, "source"), agg["tokens_saved"])
+    _echo_breakdown("Por tipo", analytics.by_field(events, "content_type"), agg["tokens_saved"])
+    typer.echo("")
+
+
+def _echo_breakdown(title: str, buckets: dict, total: int) -> None:
+    if not buckets or total <= 0:
+        return
+    typer.echo(f"\n  {title}")
+    for name, saved in list(buckets.items())[:6]:
+        pct = saved / total * 100
+        bar = "█" * max(1, round(pct / 5))
+        typer.echo(f"    {name:<8} {pct:>4.0f}%  {bar}")
+
+
 def main() -> None:
+    # Terminais Windows costumam usar cp1252 e quebram nos blocos unicode do 'gain'.
+    for stream in (sys.stdout, sys.stderr):
+        try:
+            stream.reconfigure(encoding="utf-8")
+        except (AttributeError, ValueError):
+            pass
     app()
+
+
+if __name__ == "__main__":
+    main()

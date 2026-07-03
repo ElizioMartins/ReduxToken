@@ -54,7 +54,7 @@ Design detalhado em [ANALYTICS.md](ANALYTICS.md).
 - [x] Event log unificado `~/.redux-token/events.jsonl` (append-only, local)
 - [x] `telemetry.py` (lib/CLI/hook/MCP) + `events.rs` (proxy) escrevendo o mesmo schema
 - [x] Instrumentar os 5 pontos de compressão (lib, CLI, proxy, hook, MCP)
-- [ ] `redux-token gain` — histórico + gráfico ASCII (sparkline) + breakdown por fonte/tipo
+- [x] `redux-token gain` — histórico + gráfico ASCII (sparkline) + breakdown por fonte/tipo
 - [ ] `redux-token session` — adoção agrupada por `session_id`
 - [ ] `redux-token discover` — regras determinísticas de oportunidade perdida
 - [ ] `redux-token doctor` — health check dos 5 pontos (do Headroom)
