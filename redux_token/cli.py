@@ -300,6 +300,33 @@ def doctor(
     raise typer.Exit(1 if fails else 0)
 
 
+@app.command()
+def gc(
+    ttl: float = typer.Option(24.0, help="Remove trechos com mais de N horas (0 = ignora idade)"),
+    max_mb: float = typer.Option(0.0, help="Limite de tamanho do store em MB (0 = sem limite)"),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Só mostra o que seria removido"),
+) -> None:
+    """Limpa o store de compressão reversível (TTL e/ou tamanho máximo)."""
+    from redux_token import reversible
+
+    before = reversible.store_stats()
+    result = reversible.gc(
+        ttl_hours=(ttl if ttl > 0 else None),
+        max_mb=(max_mb if max_mb > 0 else None),
+        dry_run=dry_run,
+    )
+    freed_mb = result["freed_bytes"] / 1024 / 1024
+    verb = "seriam removidos" if dry_run else "removidos"
+    typer.echo(
+        f"Store reversível: {before['files']} trechos "
+        f"({before['bytes'] / 1024 / 1024:.2f} MB)."
+    )
+    typer.echo(
+        f"{result['removed']} {verb} ({freed_mb:.2f} MB), "
+        f"{result['remaining']} restante(s)."
+    )
+
+
 def _echo_breakdown(title: str, buckets: dict, total: int) -> None:
     if not buckets or total <= 0:
         return

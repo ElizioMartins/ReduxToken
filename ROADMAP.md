@@ -62,13 +62,14 @@ chamada. Fecha a maior lacuna vs. RTK (`gain`/`discover`/`session`) e Headroom (
 
 ## Fase 6 — Compressão reversível (CCR)
 
-Objetivo: comprimir de forma agressiva **sem perder informação** — original em cache, o
-modelo recupera sob demanda. Maior alavanca técnica vinda do Headroom.
+Objetivo: comprimir de forma agressiva **sem perder informação** — trechos removidos vão
+para um store local e o modelo recupera sob demanda. Maior alavanca técnica vinda do Headroom.
 
-- [ ] Estender `CompressionCache` para guardar o original (não só o comprimido)
-- [ ] Tool MCP `retrieve` + endpoint proxy para reidratar trechos comprimidos
-- [ ] TTL configurável do cache reversível
-- [ ] Marcadores no texto comprimido apontando o que pode ser recuperado
+- [x] Store reversível content-addressed em disco (`~/.redux-token/reversible/`, `ref=sha256[:12]`)
+- [x] Marcadores `⟦rdx:ref⟧` no lugar exato do trecho removido (a nível de filtro)
+- [x] `ReduxToken(reversible=True)` + tool MCP `retrieve` + proxy reversível (config `[reversible]`)
+- [x] TTL / tamanho máximo via `redux-token gc`
+- [ ] Adiado p/ Fase 7: `JsonFilter`/`SmartFilter` reversíveis; comentários `#` (Python)
 
 ## Fase 7 — Filtros de nova geração
 

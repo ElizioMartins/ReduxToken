@@ -41,7 +41,7 @@ apontando para esse conteúdo — vazariam estratégia.
 
 - Filtros em Rust implementam o trait `Filter`. Ao criar um novo filtro, implemente o trait e registre no `Compressor::default()`.
 - `CompressionStats` é retornado por toda compressão. Não remova campos — quebraria bindings Python.
-- A CLI usa `typer`. Comandos disponíveis: `compress`, `cost`, `watch`, `report`, `gain`, `session`, `discover`. Novos subcomandos seguem o padrão `@app.command()`.
+- A CLI usa `typer`. Comandos disponíveis: `compress`, `cost`, `watch`, `report`, `gain`, `session`, `discover`, `doctor`, `gc`. Novos subcomandos seguem o padrão `@app.command()`.
 - `hook.py` é o PostToolUse hook para Claude Code — nunca levante exceções sem capturar; falha silenciosa é o comportamento correto.
 - `ReduxToken(extra_filters=[...])` aceita funções Python `str -> str` que rodam após o core Rust.
 - Testes unitários dos filtros Rust ficam inline (`#[cfg(test)]` em cada arquivo). Testes de integração Python ficam em `tests/`.

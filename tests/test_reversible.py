@@ -81,3 +81,51 @@ def test_non_reversible_compress_has_no_marker(isolated_home):
     rt = ReduxToken(reversible=False)
     compressed, _ = rt.compress("[DEBUG] x\n" * 20 + "fica")
     assert reversible.find_refs(compressed) == []
+
+
+# --- gc / TTL ---------------------------------------------------------------
+
+def _age_file(path, hours):
+    import os
+    import time
+    old = time.time() - hours * 3600
+    os.utime(path, (old, old))
+
+
+def test_store_stats(isolated_home):
+    reversible.put("aaa")
+    reversible.put("bbb")
+    stats = reversible.store_stats()
+    assert stats["files"] == 2 and stats["bytes"] > 0
+
+
+def test_gc_removes_old_by_ttl(isolated_home):
+    old_ref = reversible.put("trecho velho")
+    new_ref = reversible.put("trecho novo")
+    _age_file(isolated_home / "reversible" / f"{old_ref}.txt", hours=48)
+    result = reversible.gc(ttl_hours=24)
+    assert result["removed"] == 1
+    assert reversible.get(old_ref) is None
+    assert reversible.get(new_ref) == "trecho novo"
+
+
+def test_gc_dry_run_keeps_files(isolated_home):
+    ref = reversible.put("x")
+    _age_file(isolated_home / "reversible" / f"{ref}.txt", hours=100)
+    result = reversible.gc(ttl_hours=1, dry_run=True)
+    assert result["removed"] == 1
+    assert reversible.get(ref) == "x"  # não foi apagado de fato
+
+
+def test_gc_max_mb_removes_oldest(isolated_home):
+    r1 = reversible.put("a" * 5000)
+    r2 = reversible.put("b" * 5000)
+    _age_file(isolated_home / "reversible" / f"{r1}.txt", hours=10)  # r1 é o mais antigo
+    # limite ~5KB força remover o mais antigo; ttl desligado
+    result = reversible.gc(ttl_hours=None, max_mb=0.005)
+    assert result["removed"] >= 1
+    assert reversible.get(r1) is None
+
+
+def test_gc_empty_store(isolated_home):
+    assert reversible.gc()["removed"] == 0

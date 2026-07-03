@@ -68,6 +68,9 @@ redux-token discover         # oportunidades de otimização
 # Diagnóstico das integrações (core, event log, hook, proxy, MCP)
 redux-token doctor
 
+# Limpar o store de compressão reversível (TTL / tamanho)
+redux-token gc --ttl 24
+
 # Salvar snapshot de economia em REDUXTOKEN_STATS.md
 redux-token report
 ```

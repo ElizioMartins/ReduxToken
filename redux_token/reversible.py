@@ -25,8 +25,12 @@ _HEX_RE = re.compile(r"[0-9a-f]{6,64}")
 _MARKER_RE = re.compile(r"⟦rdx:([0-9a-f]{6,64})⟧")
 
 
-def _dir() -> Path:
+def store_dir() -> Path:
     return telemetry.home_dir() / "reversible"
+
+
+def _dir() -> Path:
+    return store_dir()
 
 
 def ref_for(text: str) -> str:
@@ -79,3 +83,75 @@ def get(ref: str) -> str | None:
 
 # Alias semântico usado pela tool MCP e pela API pública.
 retrieve = get
+
+
+def store_stats() -> dict:
+    """Contagem e tamanho total do store reversível."""
+    d = store_dir()
+    files = list(d.glob("*.txt")) if d.exists() else []
+    total = 0
+    for f in files:
+        try:
+            total += f.stat().st_size
+        except OSError:
+            pass
+    return {"files": len(files), "bytes": total}
+
+
+def gc(
+    ttl_hours: float | None = 24.0,
+    max_mb: float | None = None,
+    dry_run: bool = False,
+) -> dict:
+    """Limpa o store reversível.
+
+    Remove trechos com mais de ``ttl_hours`` (por mtime) e, se ``max_mb`` for dado,
+    remove os mais antigos até o store caber no limite. ``dry_run`` só simula.
+    """
+    import time
+
+    d = store_dir()
+    if not d.exists():
+        return {"removed": 0, "freed_bytes": 0, "remaining": 0}
+
+    now = time.time()
+    files: list[tuple[Path, float, int]] = []  # (path, mtime, size)
+    for f in d.glob("*.txt"):
+        try:
+            st = f.stat()
+            files.append((f, st.st_mtime, st.st_size))
+        except OSError:
+            continue
+
+    doomed: set[Path] = set()
+
+    if ttl_hours is not None:
+        cutoff = now - ttl_hours * 3600
+        doomed.update(f for f, mtime, _ in files if mtime < cutoff)
+
+    if max_mb is not None:
+        limit = max_mb * 1024 * 1024
+        survivors = [(f, mtime, size) for f, mtime, size in files if f not in doomed]
+        total = sum(size for _, _, size in survivors)
+        survivors.sort(key=lambda x: x[1])  # mais antigos primeiro
+        i = 0
+        while total > limit and i < len(survivors):
+            f, _, size = survivors[i]
+            doomed.add(f)
+            total -= size
+            i += 1
+
+    removed = 0
+    freed = 0
+    for f, _, size in files:
+        if f in doomed:
+            freed += size
+            removed += 1
+            if not dry_run:
+                try:
+                    f.unlink()
+                except OSError:
+                    freed -= size
+                    removed -= 1
+
+    return {"removed": removed, "freed_bytes": freed, "remaining": len(files) - removed}
