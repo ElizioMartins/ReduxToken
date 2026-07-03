@@ -1,7 +1,6 @@
 import sys
 import time
 import json
-import urllib.request
 from pathlib import Path
 
 import typer
@@ -103,10 +102,7 @@ def watch(
 
 @app.command()
 def report(
-    stats_url: str = typer.Option(
-        "http://localhost:8080/_redux/stats",
-        help="URL do endpoint de stats do proxy",
-    ),
+    since: str = typer.Option("all", "--since", "-s", help="Janela: 24h, 7d, 30d, all"),
     output: Path = typer.Option(
         Path("REDUXTOKEN_STATS.md"),
         "--output",
@@ -114,26 +110,41 @@ def report(
         help="Arquivo de relatório",
     ),
 ) -> None:
-    """Salva snapshot das estatísticas do proxy em REDUXTOKEN_STATS.md."""
+    """Salva snapshot da economia (todas as fontes) em REDUXTOKEN_STATS.md."""
+    from redux_token import analytics
+
     try:
-        with urllib.request.urlopen(stats_url, timeout=3) as resp:
-            data = json.loads(resp.read())
-    except Exception as e:
-        typer.echo(f"Erro ao conectar ao proxy ({stats_url}): {e}", err=True)
+        delta = analytics.parse_since(since)
+    except ValueError as e:
+        typer.echo(str(e), err=True)
         raise typer.Exit(1)
 
+    events = analytics.filter_since(analytics.load_events(), delta)
+    if not events:
+        typer.echo("Nenhum evento registrado nessa janela — nada a reportar.", err=True)
+        raise typer.Exit(1)
+
+    agg = analytics.aggregate(events)
+    by_source = analytics.by_field(events, "source")
     timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
-    entry = (
-        f"\n## {timestamp}\n\n"
-        f"| Métrica | Valor |\n"
-        f"|---|---|\n"
-        f"| Requests | {data['requests']} |\n"
-        f"| Cache hits | {data['cache_hits']} |\n"
-        f"| Tokens originais | {data['original_tokens']} |\n"
-        f"| Tokens comprimidos | {data['compressed_tokens']} |\n"
-        f"| Tokens economizados | {data['tokens_saved']} |\n"
-        f"| Economia | {data['savings_pct']:.1f}% |\n"
-    )
+
+    lines = [
+        f"\n## {timestamp} (janela: {since})\n",
+        "| Métrica | Valor |",
+        "|---|---|",
+        f"| Eventos | {agg['events']} |",
+        f"| Cache hits | {agg['cache_hits']} |",
+        f"| Tokens originais | {agg['original_tokens']} |",
+        f"| Tokens comprimidos | {agg['compressed_tokens']} |",
+        f"| Tokens economizados | {agg['tokens_saved']} |",
+        f"| Redução | {agg['reduction_pct']:.1f}% |",
+        "",
+        "Economia por fonte:",
+        "",
+    ]
+    for name, saved in by_source.items():
+        lines.append(f"- **{name}**: {saved} tokens")
+    entry = "\n".join(lines) + "\n"
 
     if output.exists():
         output.write_text(output.read_text(encoding="utf-8") + entry, encoding="utf-8")
@@ -142,7 +153,8 @@ def report(
 
     typer.echo(f"Relatório salvo em {output}")
     typer.echo(
-        f"Acumulado: {data['tokens_saved']} tokens economizados ({data['savings_pct']:.1f}%)"
+        f"Acumulado ({since}): {agg['tokens_saved']} tokens economizados "
+        f"({agg['reduction_pct']:.1f}%)"
     )
 
 

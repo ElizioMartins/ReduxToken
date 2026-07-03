@@ -60,7 +60,15 @@ redux-token watch arquivo.log
 # Estimar custo
 redux-token cost 10000 800 --price 0.003
 
-# Salvar relatório de economia do proxy
+# Ver economia acumulada (histórico, gráfico, breakdown por fonte/tipo)
+redux-token gain --since 7d
+redux-token session          # adoção por execução
+redux-token discover         # oportunidades de otimização
+
+# Diagnóstico das integrações (core, event log, hook, proxy, MCP)
+redux-token doctor
+
+# Salvar snapshot de economia em REDUXTOKEN_STATS.md
 redux-token report
 ```
 

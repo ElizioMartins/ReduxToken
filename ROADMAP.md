@@ -57,9 +57,9 @@ Design detalhado em [ANALYTICS.md](ANALYTICS.md).
 - [x] `redux-token gain` — histórico + gráfico ASCII (sparkline) + breakdown por fonte/tipo
 - [x] `redux-token session` — adoção agrupada por `session_id`
 - [x] `redux-token discover` — regras determinísticas de oportunidade perdida
-- [ ] `redux-token doctor` — health check dos 5 pontos (do Headroom)
-- [ ] Migrar `redux-token report` para ler do event log
-- [ ] Opt-out via `REDUX_TOKEN_NO_STATS` / config; nunca sai da máquina
+- [x] `redux-token doctor` — health check dos 5 pontos (do Headroom)
+- [x] Migrar `redux-token report` para ler do event log
+- [x] Opt-out via `REDUX_TOKEN_NO_STATS`; nunca sai da máquina
 
 ## Fase 6 — Compressão reversível (CCR)
 

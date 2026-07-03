@@ -184,6 +184,25 @@ def test_discover_cache_underused():
     assert any(f["level"] == "tip" and "Cache" in f["title"] for f in findings)
 
 
+def test_report_reads_event_log(tmp_path, monkeypatch):
+    monkeypatch.setenv("REDUX_TOKEN_HOME", str(tmp_path))
+    ts = datetime.now(timezone.utc)
+    log = tmp_path / "events.jsonl"
+    log.write_text(
+        "\n".join(json.dumps({**_ev(ts, source=s), "session_id": "s"}) for s in ("proxy", "hook")) + "\n",
+        encoding="utf-8",
+    )
+    from typer.testing import CliRunner
+    from redux_token.cli import app
+
+    out = tmp_path / "STATS.md"
+    result = CliRunner().invoke(app, ["report", "--output", str(out)])
+    assert result.exit_code == 0
+    content = out.read_text(encoding="utf-8")
+    assert "Economia por fonte" in content
+    assert "**proxy**" in content and "**hook**" in content
+
+
 def test_discover_healthy_data_no_false_positives():
     now = datetime(2026, 7, 3, 12, 0, tzinfo=timezone.utc)
     # boa economia, recente, cache saudável, volume equilibrado
