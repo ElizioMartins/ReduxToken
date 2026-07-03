@@ -90,9 +90,10 @@ compressed, stats = rt.compress(text)
 
 ## Compressão reversível (CCR)
 
-Por padrão a compressão é destrutiva — o que é removido some. Com `reversible=True`, o
-conteúdo original é guardado num store local e o texto comprimido recebe um marcador
-`⟦rdx:ref⟧`. Se o modelo precisar do detalhe, ele **recupera sob demanda**:
+Por padrão a compressão é destrutiva — o que é removido some. Com `reversible=True`, cada
+trecho removido (comentários de código, blocos de log) é guardado num store local e
+substituído por um marcador `⟦rdx:ref⟧` no lugar exato. Se o modelo precisar do detalhe,
+ele **recupera sob demanda** apenas aquele trecho:
 
 ```python
 from redux_token import ReduxToken, reversible
