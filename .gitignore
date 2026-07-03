@@ -32,9 +32,6 @@ Thumbs.db
 # Gerado em runtime
 REDUXTOKEN_STATS.md
 
-# Docs internos de planejamento/estudo — nunca versionar (repo é público)
-docs/internal/
-
 # Arquivos antigos do projeto
 kompressa_projeto.tar.gz
 README_REDUXTOKEN.md
