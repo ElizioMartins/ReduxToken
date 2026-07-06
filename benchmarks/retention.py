@@ -84,6 +84,12 @@ def build_cases() -> list[dict]:
             "drop": ["Validate input before querying", "Query database", "@author"],
         },
         {
+            "name": "Code (URL + comment)",
+            "content": 'const api = "https://api.exemplo.com/v1"; // endpoint interno',
+            "keep": ["https://api.exemplo.com/v1"],  # URL não pode ser destruída
+            "drop": ["endpoint interno"],
+        },
+        {
             "name": "JSON (large array)",
             "content": big_array,
             "keep": ['"name"', '"role"', "user0"],

@@ -76,7 +76,9 @@ para um store local e o modelo recupera sob demanda. Maior alavanca técnica vin
 Objetivo: subir de regex para compressão com consciência de estrutura, mantendo a
 identidade determinística/auditável (sem modelo ML opaco).
 
-- [ ] `CodeFilter` AST-aware (começar por Python via tree-sitter/`syn`)
+- [x] `CodeFilter` mais seguro: scanner de `//` ciente de strings e URLs (`://`) — corrige
+      destruição de URLs. (Spike descartou tree-sitter: peso desproporcional; `#` global é
+      inseguro p/ markdown/shebang. AST-aware fica como item futuro se houver demanda real.)
 - [x] `JsonFilter` inteligente (resumir arrays de dicts / objetos aninhados)
 - [x] Hook `PreToolUse` experimental — reescreve comandos ruidosos (`git status`, `git log`,
       `npm ls`…) via `rewrite.py`; também exposto como `redux-token lean`
