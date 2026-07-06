@@ -14,6 +14,11 @@ Core de alta performance em **Rust**, interface acessível em **Python**.
 | Texto repetitivo | 367 | 12 | **97%** |
 | **Média** | | | **~90%** |
 
+**Informação preservada:** a compressão remove ruído sem descartar o sinal. Um benchmark
+determinístico (`python benchmarks/retention.py`) verifica, por cenário, que os trechos
+essenciais sobrevivem — **100% de retenção do sinal** e 100% de remoção de ruído nos casos
+testados. É validado no CI como teste de regressão.
+
 ## Instalação
 
 ```bash
