@@ -76,6 +76,9 @@ redux-token doctor
 # Limpar o store de compressão reversível (TTL / tamanho)
 redux-token gc --ttl 24
 
+# Sugerir versão de menor saída de um comando ruidoso
+redux-token lean "git status"   # -> git status --short --branch
+
 # Salvar snapshot de economia em REDUXTOKEN_STATS.md
 redux-token report
 ```
@@ -156,6 +159,30 @@ Para projetos externos, adicione ao `.claude/settings.json`:
   }
 }
 ```
+
+## Hook PreToolUse (experimental)
+
+Além de comprimir a saída (PostToolUse), o ReduxToken pode enxugar comandos ruidosos
+**antes** de rodarem, trocando-os por variantes de menor saída (ex.: `git status` →
+`git status --short --branch`). Escopo pequeno e conservador — só reescreve comandos
+conhecidos e exatos.
+
+```json
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [{ "type": "command", "command": "python -m redux_token.prehook" }]
+      }
+    ]
+  }
+}
+```
+
+> Experimental: a troca efetiva depende de o Claude Code em uso suportar `updatedInput`
+> no PreToolUse; caso contrário, é um no-op inofensivo. A lógica também está disponível
+> via `redux-token lean "<comando>"`.
 
 ## MCP Server (Claude Desktop, Cursor, Zed, etc.)
 

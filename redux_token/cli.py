@@ -327,6 +327,22 @@ def gc(
     )
 
 
+@app.command()
+def lean(
+    command: str = typer.Argument(..., help="Comando a enxugar, ex.: \"git status\""),
+) -> None:
+    """Sugere uma versão de menor saída para um comando ruidoso conhecido."""
+    from redux_token.rewrite import lean_command
+
+    new, why = lean_command(command)
+    if new:
+        typer.echo(new)
+        typer.echo(f"# {command!r} → saída mais enxuta ({why})", err=True)
+    else:
+        typer.echo(command)
+        typer.echo("# sem reescrita conhecida para este comando", err=True)
+
+
 def _echo_breakdown(title: str, buckets: dict, total: int) -> None:
     if not buckets or total <= 0:
         return

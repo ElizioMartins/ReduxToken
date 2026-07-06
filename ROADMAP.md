@@ -78,7 +78,8 @@ identidade determinística/auditável (sem modelo ML opaco).
 
 - [ ] `CodeFilter` AST-aware (começar por Python via tree-sitter/`syn`)
 - [x] `JsonFilter` inteligente (resumir arrays de dicts / objetos aninhados)
-- [ ] Hook `PreToolUse` experimental p/ 2–3 comandos ruidosos (`git status`, `ls`, `grep`)
+- [x] Hook `PreToolUse` experimental — reescreve comandos ruidosos (`git status`, `git log`,
+      `npm ls`…) via `rewrite.py`; também exposto como `redux-token lean`
 - [x] Benchmark de **informação preservada** (`benchmarks/retention.py`) — 100% de retenção
       do sinal, com teste de regressão
 
