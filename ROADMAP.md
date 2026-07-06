@@ -77,7 +77,7 @@ Objetivo: subir de regex para compressão com consciência de estrutura, mantend
 identidade determinística/auditável (sem modelo ML opaco).
 
 - [ ] `CodeFilter` AST-aware (começar por Python via tree-sitter/`syn`)
-- [ ] `JsonFilter` inteligente (resumir arrays de dicts / objetos aninhados)
+- [x] `JsonFilter` inteligente (resumir arrays de dicts / objetos aninhados)
 - [ ] Hook `PreToolUse` experimental p/ 2–3 comandos ruidosos (`git status`, `ls`, `grep`)
 - [ ] Benchmark de **acurácia preservada** (não só % de tokens) — credibilidade
 
