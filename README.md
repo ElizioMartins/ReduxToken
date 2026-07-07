@@ -143,7 +143,14 @@ Configuração em `proxy.toml` (criado automaticamente com valores padrão).
 
 ## Hook para Claude Code
 
-Com o projeto clonado, o hook já está ativo via `.claude/settings.json`. Ele comprime automaticamente outputs grandes de Bash e Read antes que entrem no contexto do modelo.
+Com o projeto clonado, o hook já está ativo via `.claude/settings.json`. A cada saída
+grande de Bash/Read/Grep/Glob, ele **mede e registra** quanto poderia ser economizado no
+event log (fonte `hook`), alimentando `redux-token gain`/`discover`. Assim você enxerga o
+volume de ruído que suas ferramentas produzem.
+
+> Um hook `PostToolUse` roda **depois** que a saída já foi gerada, então ele não reduz o
+> texto que já entrou no contexto — para compressão real-time do que vai ao modelo, use o
+> **proxy HTTP** (que reescreve as mensagens no caminho da requisição).
 
 Para projetos externos, adicione ao `.claude/settings.json`:
 
