@@ -25,6 +25,9 @@ build/
 # Claude Code local settings
 .claude/settings.local.json
 
+# MCP local (caminho absoluto do venv desta máquina — não versionar)
+.mcp.json
+
 # OS
 .DS_Store
 Thumbs.db
