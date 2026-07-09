@@ -3,7 +3,7 @@ use crate::rev::RevCollector;
 
 // Log prefixes that add no semantic content for LLM consumption
 const LOG_PREFIXES: &[&str] = &[
-    "[DEBUG]", "[TRACE]", "DEBUG:", "TRACE:",
+    "[DEBUG]", "[VERBOSE]", "[NOTICE]", "[FATAL]", "[TRACE]", "DEBUG:", "TRACE:",
     "DEBUG -", "TRACE -",
 ];
 
