@@ -4,6 +4,14 @@
   <img src="assets/reduxtoken-card.png" alt="ReduxToken — compressor de tokens para LLMs: ~90% de economia média, núcleo em Rust, interface em Python" width="720">
 </p>
 
+<p align="center">
+  <a href="https://pypi.org/project/redux-token/"><img src="https://img.shields.io/pypi/v/redux-token?color=f2683a" alt="PyPI"></a>
+  <img src="https://img.shields.io/pypi/pyversions/redux-token" alt="Python 3.10–3.13">
+  <img src="https://img.shields.io/badge/core-Rust-f2683a" alt="Rust">
+  <img src="https://img.shields.io/pypi/l/redux-token?color=blue" alt="Apache-2.0">
+  <a href="CONTRIBUTING.md"><img src="https://img.shields.io/badge/PRs-welcome-4ec98a" alt="PRs welcome"></a>
+</p>
+
 Compressor inteligente de tokens para LLMs. Reduz o custo e o consumo de tokens ao comprimir texto, JSON, código e logs antes de enviá-los para modelos como Claude e GPT-4.
 
 Core de alta performance em **Rust**, interface acessível em **Python**.
@@ -254,6 +262,14 @@ python examples/basic.py
 ```
 
 Veja [ARCHITECTURE.md](ARCHITECTURE.md) para decisões técnicas e [ROADMAP.md](ROADMAP.md) para o plano de desenvolvimento.
+
+## Como contribuir
+
+Contribuições são muito bem-vindas — de código a docs, ou só testar e dar feedback. 🎉
+
+- Veja as issues marcadas como **[`good first issue`](https://github.com/ElizioMartins/ReduxToken/labels/good%20first%20issue)** para começar.
+- Leia o **[CONTRIBUTING.md](CONTRIBUTING.md)** (setup, testes, padrão de commits, como abrir PR).
+- Deixar uma ⭐ e compartilhar também ajuda o projeto a crescer.
 
 ## Apoio
 
