@@ -1,5 +1,9 @@
 # ReduxToken
 
+<p align="center">
+  <img src="assets/reduxtoken-card.png" alt="ReduxToken — compressor de tokens para LLMs: ~90% de economia média, núcleo em Rust, interface em Python" width="720">
+</p>
+
 Compressor inteligente de tokens para LLMs. Reduz o custo e o consumo de tokens ao comprimir texto, JSON, código e logs antes de enviá-los para modelos como Claude e GPT-4.
 
 Core de alta performance em **Rust**, interface acessível em **Python**.
